@@ -1,5 +1,3 @@
-import numpy as np
-
 class SentenceRanker():
     def __init__(self, sentence_view, token_view):
         """
