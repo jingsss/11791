@@ -1,3 +1,5 @@
+from BM25 import BM25
+
 class SentenceRanker():
     def __init__(self, sentence_view, token_view):
         """
