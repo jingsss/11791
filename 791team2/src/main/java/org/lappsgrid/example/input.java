@@ -1,26 +1,21 @@
 package org.lappsgrid.example;
 import org.lappsgrid.api.ProcessingService;
 import org.lappsgrid.discriminator.Discriminators.Uri;
-
+// additional API for metadata
+import org.lappsgrid.metadata.IOSpecification;
+import org.lappsgrid.metadata.ServiceMetadata;
 import org.lappsgrid.serialization.Data;
 import org.lappsgrid.serialization.DataContainer;
-import org.lappsgrid.serialization.LappsIOException;
 import org.lappsgrid.serialization.Serializer;
 import org.lappsgrid.serialization.lif.Annotation;
 import org.lappsgrid.serialization.lif.Container;
 import org.lappsgrid.serialization.lif.View;
 import org.lappsgrid.vocabulary.Features;
 
-// additional API for metadata
-import org.lappsgrid.metadata.IOSpecification;
-import org.lappsgrid.metadata.ServiceMetadata;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import org.json.*;
+
 
 
 /**
@@ -52,7 +47,7 @@ public class input implements ProcessingService
 
         // Populate metadata using setX() methods
         metadata.setName(this.getClass().getName());
-        metadata.setDescription("AnswerScoring");
+        metadata.setDescription("input");
         metadata.setVersion("1.0.0-SNAPSHOT");
         metadata.setVendor("http://www.lappsgrid.org");
         metadata.setLicense(Uri.APACHE2);
@@ -66,7 +61,7 @@ public class input implements ProcessingService
         // JSON for output information
         IOSpecification produces = new IOSpecification();
         produces.addFormat(Uri.LAPPS);          // LIF (form) synonymous to LIF
-        produces.addAnnotation(Uri.TOKEN);      // Tokens (contents)
+        produces.addAnnotation(Uri.SENTENCE);      // Tokens (contents)
         requires.addLanguage("en");             // Target language
         produces.setEncoding("UTF-8");
 
@@ -102,9 +97,10 @@ public class input implements ProcessingService
 
         // Step #3: Extract the text.
         Container container = null;
-        if (discriminator.equals(Uri.LAPPS)) {
-            container = new Container((Map) data.getPayload());
-        }
+        if (discriminator.equals(Uri.JSON)) {
+          container = new Container();
+//          container.setText(data.getPayload().toString());
+      }
         else {
             // This is a format we don't accept.
             String message = String.format("Unsupported discriminator type: %s", discriminator);
@@ -112,63 +108,54 @@ public class input implements ProcessingService
         }
 
         // Step #4: Create a new View
-        List<View> views = container.getViews();
-        int len = views.size();
-        View pre_view = container.getView(len - 1);
-        List<Annotation> annotations = pre_view.getAnnotations();
-        
-        container = new Container();
-        
         View view = container.newView();
-        int id = -1;
-       Annotation question = annotations.get(0);
+        String text = data.getPayload().toString();
+//        String text = container.getText();
+        //Replace the Quotation mark to work
+        //Can be improved
+        text = text.replaceAll("\"", "");
+        JSONObject obj = null;
+//        System.out.println(text);
+        try {
+          obj = new JSONObject(text);
+        } catch (JSONException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        try {
+          //Suppose only one question
+          String question= obj.getString("question");
+          String[] temp =question.substring(1, question.length() - 1).replaceAll("\"","").split(",");
+          question = String.join(",", temp);
+          String passage = obj.getString("passage");
+          temp =passage.substring(1, passage.length() - 1).replaceAll("\"","").split(",");
+          passage = String.join(",", temp);
+          String answer = obj.getString("true_answers.text");
+          temp =answer.substring(1, answer.length() - 1).replaceAll("\"","").split(",");
+          answer = String.join(",", temp);
+          String id = obj.getString("id");
+          
+          Annotation a = view.newAnnotation("Q", Uri.SENTENCE, 0, 0);
+          a.addFeature(Features.Sentence.TARGETS, question);
+          a.addFeature(Features.Sentence.TYPE, "Question");
+          
+          int start = obj.getJSONArray("true_answers.begin").getInt(0);
+          int end = obj.getJSONArray("true_answers.end").getInt(0);
+          a = view.newAnnotation("A", Uri.SENTENCE, start, end);
+          a.addFeature(Features.Sentence.TARGETS, answer);
+          a.addFeature(Features.Sentence.TYPE, "Answer");
+          
+          a = view.newAnnotation("P", Uri.SENTENCE, 0, passage.length());
+          a.addFeature(Features.Sentence.TARGETS, passage);
+          a.addFeature(Features.Sentence.TYPE, "Passage");
+        } catch (JSONException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+          // TODO Auto-generated catch block
+          
         
-       Annotation s = view.newAnnotation("S" + (++id), Uri.TOKEN, question.getStart(), question.getEnd());
-       s.addFeature(Features.Token.TYPE, question.getFeature(Features.Token.TYPE));
-       s.addFeature(Features.Token.ID, question.getFeature(Features.Token.ID));
-       int a_len = annotations.size();
-       for(int i = 1; i < a_len; i ++){
-         Annotation anwser = annotations.get(i);
-         long start = anwser.getStart();
-         long end = anwser.getEnd();
-         s = view.newAnnotation("S" + (++id), Uri.TOKEN, (int)start, (int)end);
-         for(int j = 1; j <= 3; j ++){
-           String name = j + "-Gram";
-           Map<String, Integer> q = null;
-           try {
-             q = new HashMap<String, Integer>(
-                     question.getFeatureMap(name));
-           } catch (LappsIOException e) {
-             e.printStackTrace();
-           }
-           Map<String, Integer> a = null;
-           try {
-             a = new HashMap<String, Integer>(anwser.getFeatureMap(name));
-           }
-           catch (LappsIOException e) {
-             e.printStackTrace();
-           }
-           double score = 0;
-           for(String key: q.keySet()){
-             if(a.containsKey(key)){
-//                 score += a.get(key);
-               score += 1;
-             }
-           }
-           score = score / q.size();
-           s.addFeature(name, String.format("%.2f", score));
-         }
-   
-           s.addFeature(Features.Token.TYPE, anwser.getFeature(Features.Token.TYPE));
-           s.addFeature(Features.Token.ID, anwser.getFeature(Features.Token.ID));
-           s.addFeature("isCorrect", anwser.getFeature("isCorrect"));
-       }
-       
-        // Step #6: Update the view's metadata. Each view contains metadata about the
-        // annotations it contains, in particular the name of the tool that produced the
-        // annotations.
-        view.addContains(Uri.TOKEN, this.getClass().getName(), "AnswerScoring");
-
+//        System.out.println(temp.get("question"));
         // Step #7: Create a DataContainer with the result.
         data = new DataContainer(container);
 
