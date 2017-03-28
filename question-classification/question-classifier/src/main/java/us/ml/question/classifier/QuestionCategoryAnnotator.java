@@ -1,5 +1,6 @@
 package us.ml.question.classifier;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.uima.UimaContext;
@@ -31,6 +32,7 @@ public class QuestionCategoryAnnotator extends CleartkAnnotator<String> {
   FeatureExtractor1<Sentence> whWordExtractor;
   CleartkExtractor<Token, Token> ngramExtractor;
 
+  public  HashMap<String, String> res_map;
   @Override
   public void initialize(UimaContext context) throws ResourceInitializationException {
     super.initialize(context);
@@ -54,14 +56,17 @@ public class QuestionCategoryAnnotator extends CleartkAnnotator<String> {
       }
     }
     if (this.isTraining()) {
-      QuestionCategoryAnnotation category = JCasUtil.selectSingle(jCas, QuestionCategoryAnnotation.class);
+      QuestionCategoryAnnotation category= JCasUtil.selectSingle(jCas, QuestionCategoryAnnotation.class);
       instance.setOutcome(category.getCategory());
       this.dataWriter.write(instance);
     } else {
       String outcome = this.classifier.classify(instance.getFeatures());
       QuestionCategoryAnnotation category = new QuestionCategoryAnnotation(jCas, 0, jCas.getDocumentText().length());
+      //res_map.put(jCas.getDocumentText().toString(), outcome);
       category.setCategory(outcome);
       category.addToIndexes();
+      //System.out.println(headWordExtractor.extract(jCas, sentence));
+      
     }
   }
 
