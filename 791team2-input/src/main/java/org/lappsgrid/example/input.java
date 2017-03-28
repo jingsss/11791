@@ -122,9 +122,9 @@ public class input implements ProcessingService
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
+
         try {
-          //Suppose only one question
-          String question= obj.getString("question");
+          String question = obj.getString("question");
           String[] temp =question.substring(1, question.length() - 1).replaceAll("\"","").split(",");
           question = String.join(",", temp);
           String passage = obj.getString("passage");

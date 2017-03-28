@@ -1,0 +1,16 @@
+import java.net.*;
+import java.lang.String;
+import java.io.*;
+import json.org.*;
+String urlString = "http://127.0.0.1:5000/getdata?row=1";
+URL url = new URL(urlString);
+BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+String json = ""
+String line;
+while ((line = reader.readLine()) != null){
+	json = json + line + "\n"
+}
+reader.close();
+Data data = new Data<>();
+data = Serializer.parse(json, Data.class)
+System.out.println(data.asPrettyJson());
