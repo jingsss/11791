@@ -5,7 +5,13 @@ import requests
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
-@app.route("/pipeline",methods=['GET', 'POST'])
+def get_from_component(obj, url):
+	headers = {'Content-Type' : 'application/json;charset=UTF-8'}
+	r = requests.post(url, data=json.dumps(obj), headers=headers)
+	obj = r.json()
+	return obj
+	
+@app.route("/pipeline",methods=['GET', 'POST'])	
 def pipeline():
 	row = int(request.args.get('row'))
 	source_url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json"%(row, row - 1)
@@ -13,11 +19,8 @@ def pipeline():
 	annotator = "http://127.0.0.1:5000/annotator"
 	r = requests.get(source_url)
 	obj = r.json()
-	headers = {'Content-Type' : 'application/json;charset=UTF-8'}
-	r = requests.post(input_component, data=json.dumps(obj), headers=headers)
-	obj = r.json()
-	r = requests.post(annotator, data=json.dumps(obj), headers=headers)
-	obj = r.json()
+	obj = get_from_component(obj, input_component)
+	obj = get_from_component(obj, input_component)
 	return jsonify(obj)
 
 if __name__ == "__main__":
