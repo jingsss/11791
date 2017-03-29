@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -47,6 +48,7 @@ import us.ml.question.classifier.annotations.QuestionCategoryAnnotation;
 
 public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, AnnotationStatistics<String>> {
 
+  protected  HashMap<String, String> res_map;
   public interface Options {
     @Option(longName = "train-dir", description = "Specify the directory containing the training documents. ",
         defaultValue = "data/train")
@@ -83,7 +85,7 @@ public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, Annota
 
     QuestionCategoryEvaluation evaluation =
         new QuestionCategoryEvaluation(options.getModelsDirectory(), options.getTrainingArguments());
-
+    /*
     // Run Cross Validation
     List<AnnotationStatistics<String>> foldStats = evaluation.crossValidation(trainFiles, 2);
     AnnotationStatistics<String> crossValidationStats = AnnotationStatistics.addAll(foldStats);
@@ -93,13 +95,21 @@ public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, Annota
     System.err.println();
     System.err.println(crossValidationStats.confusions());
     System.err.println();
-
+  */
     // Run Holdout Set
-    AnnotationStatistics<String> holdoutStats = evaluation.trainAndTest(trainFiles, testFiles);
+    
+    File subDirectory = new File(evaluation.baseDirectory, "train_and_test");
+    subDirectory.mkdirs();
+    evaluation.train(evaluation.getCollectionReader(trainFiles), subDirectory);
+    AnnotationStatistics<String> eval_test = evaluation.test(evaluation.getCollectionReader(testFiles), subDirectory);
+    
+    //AnnotationStatistics<String> holdoutStats = evaluation.trainAndTest(trainFiles, testFiles);
+    //AnnotationStatistics<String> eval_train = evaluation.trainAndTest(trainFiles, testFiles);
+    //AnnotationStatistics<String> eval_test = evaluation.trainAndTest(trainFiles, testFiles);
     System.err.println("Holdout Set Results:");
-    System.err.print(holdoutStats);
+    System.err.print(eval_test);
     System.err.println();
-    System.err.println(holdoutStats.confusions());
+    System.err.println(eval_test.confusions());
   }
 
   public static final String GOLD_VIEW_NAME = "DocumentClassificationGoldView";
@@ -147,7 +157,7 @@ public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, Annota
   @Override
   protected AnnotationStatistics<String> test(CollectionReader collectionReader, File directory) throws Exception {
     AnnotationStatistics<String> stats = new AnnotationStatistics<String>();
-
+    res_map = new HashMap<String, String>();
     AggregateBuilder builder = new AggregateBuilder();
 
     final String defaultViewName = CAS.NAME_DEFAULT_SOFA;
@@ -168,8 +178,9 @@ public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, Annota
     builder.add(documentClassificationAnnotator);
 
     AnalysisEngine engine = builder.createAggregate();
-
-    // Run and evaluate
+//QuestionCategoryAnnotation wa;
+//wa
+// Run and evaluate
     Function<QuestionCategoryAnnotation, ?> getSpan = AnnotationStatistics.annotationToSpan();
     Function<QuestionCategoryAnnotation, String> getCategory =
         AnnotationStatistics.annotationToFeatureValue("category");
@@ -184,8 +195,13 @@ public class QuestionCategoryEvaluation extends Evaluation_ImplBase<File, Annota
       Collection<QuestionCategoryAnnotation> systemCategories =
           JCasUtil.select(systemView, QuestionCategoryAnnotation.class);
       stats.add(goldCategories, systemCategories, getSpan, getCategory);
+      QuestionCategoryAnnotation tmp = (QuestionCategoryAnnotation)systemCategories.toArray()[0];
+      
+      System.out.println(tmp.getCategory());
+    System.out.println(jCas.getDocumentText().toString());
+      res_map.put(jCas.getDocumentText().toString(), tmp.getCategory());
     }
-
+    
     return stats;
   }
 }
