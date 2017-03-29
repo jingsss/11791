@@ -80,8 +80,7 @@ def input_component():
 @app.route("/annotator",methods=['GET', 'POST'])
 def annotator():
 	t = request.json
-	print str(t["payload"]["views"])
-	return "annotator"
+	return jsonify(t["payload"]["views"])
 
 if __name__ == "__main__":
 	app.run()
