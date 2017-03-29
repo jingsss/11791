@@ -2,15 +2,18 @@ import java.net.*;
 import java.lang.String;
 import java.io.*;
 import json.org.*;
-String urlString = "http://127.0.0.1:5000/getdata?row=1";
+
+String urlString = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=1&wt=json";
 URL url = new URL(urlString);
-BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-String json = ""
-String line;
-while ((line = reader.readLine()) != null){
-	json = json + line + "\n"
-}
-reader.close();
-Data data = new Data<>();
-data = Serializer.parse(json, Data.class)
-System.out.println(data.asPrettyJson());
+HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+connection.setRequestMethod("GET");
+connection.connect();
+int code = connection.getResponseCode();
+InputStream response = connection.getInputStream();
+jsonReply = convertStreamToString(response);
+System.out.println(jsonReply)
+
+//reader.close();
+//Data data = new Data<>();
+//data = Serializer.parse(json, Data.class)
+//System.out.println(data.asPrettyJson());
