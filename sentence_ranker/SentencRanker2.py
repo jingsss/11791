@@ -15,6 +15,8 @@ class SentenceRanker2():
 
 
     def rank_by_jaccard_similarity(self):
+        annotations = self.data['payload']['views']['annotations']
+        question = annotations
         print 'hi'
         pass
 
