@@ -4,6 +4,9 @@ import requests
 from collections import OrderedDict
 URI_SENTENCE = "http://vocab.lappsgrid.org/Sentence"
 SERVER = "http://127.0.0.1:5000/"
+ANS = "Answer"
+QUES = "Question"
+SENS = "Sentence"
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 def init_container_as_dict():
@@ -32,7 +35,7 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	annotation["features"] = {}
 	return annotation
 
-def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
+def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	
 	data = init_container_as_dict()
 	for q_a in jsonobj["response"]["docs"]:
@@ -46,7 +49,7 @@ def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
 		#annotate question
 		ann = new_annotation('Q', uri_type)
 		ann['features']['target'] = q_a["question"][0]
-		ann['features']['type'] = "Question"
+		ann['features']['type'] = QUES
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate answer
@@ -54,7 +57,7 @@ def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
 #		end = int(q_a["true_answers.end"][0])
 		ann = new_annotation('A', uri_type)
 		ann['features']['target'] = q_a["true_answers.text"]
-		ann['features']['type'] = "Answer"
+		ann['features']['type'] = ANS
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate passage
@@ -64,15 +67,14 @@ def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
 		for i in range(len(sentences)):
 			ann = new_annotation('S' + str(i), uri_type)
 			ann['features']['target'] = sentences[i].strip()
-			ann['features']['type'] = "Sentence"
+			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
 @app.route("/hello", methods=['GET', 'POST'])
 def hello():
-	print str(request.json)
-	return "JSON Message: " + json.dumps(request.json)
+	return jsonify("hello world")
 
 @app.route("/input_component",methods=['GET', 'POST'])
 def input_component():
@@ -83,7 +85,15 @@ def input_component():
 @app.route("/annotator",methods=['GET', 'POST'])
 def annotator():
 	t = request.json
-	return jsonify(t["payload"]["views"])
+	for view in t["payload"]["views"]:
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/annotator"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "annotator component"
+		for a in view["annotations"]:
+			if a["features"]["type"] != ANS:
+				a["features"]["tokens"] = a["features"]["target"].split()
+	return jsonify(t)
+	
+
 
 if __name__ == "__main__":
 	app.run()
