@@ -1,0 +1,25 @@
+The main function to be called is:  
+      
+      create_annotations(sentence)
+      
+  This function takes the sentence as an input and returns a dictionary. 
+  
+  The keys of the dictionary are the various annotations to be done at the sentence level such as tokens, POS Tags, is_num, NER tags etc
+
+  
+  An example is as follows:
+  Sentence:
+  
+  Output Dictionary :
+  
+  {
+  'is_num': [False, False, False, False, False, False, False, False, False, False, True, False, True, False, False, False, False, False, False, False, False], 
+  'PERCENT': ['90', '%'],
+  'pos': [('Jack', 'NNP'), ('studies', 'NNS'), ('at', 'IN'), ('Stony', 'NNP'), ('Brook', 'NNP'), ('University', 'NNP'), ('in', 'IN'), ('New', 'NNP'), ('York', 'NNP'), ('since', 'IN'), ('1999', 'CD'), ('with', 'IN'), ('90', 'CD'), ('%', 'NN'), ('percentile', 'NN'), ('at', 'IN'), ('5:00', 'CD'), ('pm', 'NN'), ('in', 'IN'), ('the', 'DT'), ('evening', 'NN')], 
+  'tokens': ['Jack', 'studies', 'at', 'Stony', 'Brook', 'University', 'in', 'New', 'York', 'since', '1999', 'with', '90', '%', 'percentile', 'at', '5:00', 'pm', 'in', 'the', 'evening'], 
+  'PERSON': [], 
+  'LOCATION': ['New', 'York'],
+  'TIME': ['evening'], 
+  'DATE': ['1999'], 
+  'ORG': ['Stony', 'Brook', 'University']
+  }
