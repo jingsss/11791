@@ -52,7 +52,7 @@ def norms(k):
 
 # using Stnaford NER Tagger 7 class 
 # check for organizations 
-def get_entity(k2, ent):
+def get_entity_old(k2, ent):
     l = []
     for x in k2:
         if x[1] == ent:
@@ -61,7 +61,26 @@ def get_entity(k2, ent):
     return l
 
 
-
+def get_entity(k2, ent):
+    l = []
+    s = ""
+    for x in k2:
+        if x[1] == ent:
+            #print x[0]
+            s += x[0].encode('ascii','ignore') +" "
+        else:
+            if s == "":
+                continue
+            else:
+                #print s
+                l.append(s)
+                s = ""
+            #l.append(x[0].encode('ascii','ignore'))
+    if s != "":
+        l.append(s)
+    
+    #print l
+    return l
 def all_entity(k2):
 
     l_org = get_entity(k2,"ORGANIZATION")
