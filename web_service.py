@@ -33,35 +33,37 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	return annotation
 
 def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
-	q_a = jsonobj["response"]["docs"][0]
+	
 	data = init_container_as_dict()
-	view = new_view()
-	#add metadata
-	view["metadata"]["contains"] = {}
-	view["metadata"]["contains"][uri_type] = {}
-	view["metadata"]["contains"][uri_type]["producer"] = component
-	view["metadata"]["contains"][uri_type]["type"] = "input component"
-	#annotate question
-	ann = new_annotation('Q', uri_type)
-	ann['features']['target'] = q_a["question"][0]
-	ann['features']['type'] = "Question"
-	ann['features']['squad_id'] = q_a["id"]
-	view["annotations"].append(ann)
-	#annotate answer
-	start = int(q_a["true_answers.begin"][0])
-	end = int(q_a["true_answers.end"][0])
-	ann = new_annotation('A', uri_type, start,end)
-	ann['features']['target'] = q_a["true_answers.text"][0]
-	ann['features']['type'] = "Answer"
-	ann['features']['squad_id'] = q_a["id"]
-	view["annotations"].append(ann)
-	#annotate passage
-	ann = new_annotation('P', uri_type)
-	ann['features']['target'] = q_a["passage"][0]
-	ann['features']['type'] = "Passage"
-	ann['features']['squad_id'] = q_a["id"]
-	view["annotations"].append(ann)
-	data['payload']['views'].append(view);
+	for q_a in jsonobj["response"]["docs"]:
+#	q_a = jsonobj["response"]["docs"][0]
+		view = new_view()
+		#add metadata
+		view["metadata"]["contains"] = {}
+		view["metadata"]["contains"][uri_type] = {}
+		view["metadata"]["contains"][uri_type]["producer"] = component
+		view["metadata"]["contains"][uri_type]["type"] = "input component"
+		#annotate question
+		ann = new_annotation('Q', uri_type)
+		ann['features']['target'] = q_a["question"][0]
+		ann['features']['type'] = "Question"
+		ann['features']['squad_id'] = q_a["id"]
+		view["annotations"].append(ann)
+		#annotate answer
+		start = int(q_a["true_answers.begin"][0])
+		end = int(q_a["true_answers.end"][0])
+		ann = new_annotation('A', uri_type, start,end)
+		ann['features']['target'] = q_a["true_answers.text"][0]
+		ann['features']['type'] = "Answer"
+		ann['features']['squad_id'] = q_a["id"]
+		view["annotations"].append(ann)
+		#annotate passage
+		ann = new_annotation('P', uri_type)
+		ann['features']['target'] = q_a["passage"][0]
+		ann['features']['type'] = "Passage"
+		ann['features']['squad_id'] = q_a["id"]
+		view["annotations"].append(ann)
+		data['payload']['views'].append(view);
 	return data
 @app.route("/hello", methods=['GET', 'POST'])
 def hello():
@@ -70,9 +72,6 @@ def hello():
 
 @app.route("/input_component",methods=['GET', 'POST'])
 def input_component():
-#	row = int(request.args.get('row'))
-#	url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json"%(row, row - 1)
-#	r = requests.get(url)
 	t = request.json
 	data = parse_element(t,"/input_component",URI_SENTENCE)
 	return jsonify(data)
