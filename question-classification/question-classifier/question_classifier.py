@@ -1,7 +1,7 @@
 """Build a simple Question Classifier using TF-IDF or Bag of Words Model"
 
 """
-
+import json
 import sys
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer, TfidfTransformer
 from sklearn.svm import LinearSVC
@@ -12,8 +12,11 @@ from sklearn.datasets import load_files
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 
+import urllib2
 
 def question_classify(docs_train, y_train, docs_test1):
+
+
     pipeline = Pipeline([
         ('vect', CountVectorizer()),
         ('tfidf', TfidfTransformer()),
@@ -44,7 +47,15 @@ def question_classify(docs_train, y_train, docs_test1):
     return y_predicted
 
 if __name__ == "__main__":
+    res = urllib2.urlopen("http://127.0.0.1:8080/pipeline?row=1").read()
+    ress =  json.loads(res)
+    #for item in ress["payload"]["views"]["annotations"]:
+    #    print item
 
+    print json.dumps(ress['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True)
+
+
+    sys.exit(0)
     # the training data folder must be passed as first argument
     questions_data_folder = sys.argv[1]
     dataset = load_files(questions_data_folder, shuffle=False)

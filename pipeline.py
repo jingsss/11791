@@ -21,9 +21,8 @@ def pipeline():
 	annotator = "http://127.0.0.1:5000/annotator"
 	r = requests.get(source_url)
 	obj = r.json()
-#	print str(obj)
 	obj = get_from_component(obj, input_component)
-#	obj = get_from_component(obj, annotator)
+	obj = get_from_component(obj, annotator)
 	return jsonify(obj)
 
 if __name__ == "__main__":
