@@ -4,10 +4,11 @@ from nltk import word_tokenize
 from nltk.tag.stanford import StanfordNERTagger
  
 import unicodedata
-
-
-classifier = '/Users/ekeni/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = '/Users/ekeni/stanford-ner/stanford-ner.jar'
+#nltk.download("words")
+#nltk.download('punkt')
+#nltk.download('averaged_perceptron_tagger')
+classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = '../stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 # 
 
@@ -81,7 +82,6 @@ def hasNumbers(k):
 
     return l
 
-S ="Jack studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening "
 
 # main function 
 #tokenize, POS tags, is num , NER Tags
@@ -102,5 +102,6 @@ def create_annotations(sentence):
     final_ans['PERCENT'] = l_percent
     return final_ans
 
-
+S ="Jack studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University "
+print create_annotations(S)
 
