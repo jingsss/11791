@@ -2,6 +2,9 @@ from flask import Flask,jsonify,request
 import urllib, json
 import requests
 from collections import OrderedDict
+import jsonrpc
+from simplejson import loads
+
 URI_SENTENCE = "http://vocab.lappsgrid.org/Sentence"
 SERVER = "http://127.0.0.1:5000/"
 ANS = "Answer"
@@ -34,9 +37,12 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	annotation["@type"] = uri_type
 	annotation["features"] = {}
 	return annotation
-
-def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
+def coref(passage):
+	server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),jsonrpc.TransportTcpIp(addr=("127.0.0.1", 8080)))
+	result = loads(server.parse(passage))
+	print result['coref']
 	
+def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	data = init_container_as_dict()
 	for q_a in jsonobj["response"]["docs"]:
 #	q_a = jsonobj["response"]["docs"][0]
@@ -61,7 +67,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate passage
-		
+		coref(q_a["passage"][0])
 		sentences = q_a["passage"][0].strip().split(".")
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
@@ -72,6 +78,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
+
 @app.route("/hello", methods=['GET', 'POST'])
 def hello():
 	return jsonify("hello world")
@@ -82,8 +89,8 @@ def input_component():
 	data = parse_element(t,"/input_component",URI_SENTENCE)
 	return jsonify(data)
 	
-@app.route("/annotator",methods=['GET', 'POST'])
-def annotator():
+@app.route("/token_annotator",methods=['GET', 'POST'])
+def token_annotator():
 	t = request.json
 	for view in t["payload"]["views"]:
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/annotator"
@@ -92,8 +99,12 @@ def annotator():
 			if a["features"]["type"] != ANS:
 				a["features"]["tokens"] = a["features"]["target"].split()
 	return jsonify(t)
-	
 
+@app.route("/question_annotator",methods=['GET', 'POST'])	
+def question_annotator():
+	t = request.json
+	return jsonify("question_annotator")
+	
 
 if __name__ == "__main__":
 	app.run()
