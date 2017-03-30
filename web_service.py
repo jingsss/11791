@@ -50,19 +50,23 @@ def parse_element(jsonobj,component, uri_type = URI_SENTENCE):
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate answer
-		start = int(q_a["true_answers.begin"][0])
-		end = int(q_a["true_answers.end"][0])
-		ann = new_annotation('A', uri_type, start,end)
-		ann['features']['target'] = q_a["true_answers.text"][0]
+#		start = int(q_a["true_answers.begin"][0])
+#		end = int(q_a["true_answers.end"][0])
+		ann = new_annotation('A', uri_type)
+		ann['features']['target'] = q_a["true_answers.text"]
 		ann['features']['type'] = "Answer"
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate passage
-		ann = new_annotation('P', uri_type)
-		ann['features']['target'] = q_a["passage"][0]
-		ann['features']['type'] = "Passage"
-		ann['features']['squad_id'] = q_a["id"]
-		view["annotations"].append(ann)
+		
+		sentences = q_a["passage"][0].strip().split(".")
+		sentences = [i for i in sentences if len(i) > 0]
+		for i in range(len(sentences)):
+			ann = new_annotation('S' + str(i), uri_type)
+			ann['features']['target'] = sentences[i].strip()
+			ann['features']['type'] = "Sentence"
+			ann['features']['squad_id'] = q_a["id"]
+			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
 @app.route("/hello", methods=['GET', 'POST'])
