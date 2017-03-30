@@ -5,12 +5,12 @@ The main function to be called is:
   This function takes the sentence as an input and returns a dictionary. 
   
   The keys of the dictionary are the various annotations to be done at the sentence level such as tokens, POS Tags, is_num, NER tags etc
-
   
   An example is as follows:
-  Sentence:
+  Sentence: "Jack studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening "
+
   
-  Output Dictionary :
+  Output :
   
   {
   'is_num': [False, False, False, False, False, False, False, False, False, False, True, False, True, False, False, False, False, False, False, False, False], 
@@ -23,3 +23,14 @@ The main function to be called is:
   'DATE': ['1999'], 
   'ORG': ['Stony', 'Brook', 'University']
   }
+
+Prerequisites 
+1.Download the Stanford NER folder from the git repository and change the corresponding file paths in the annotator.py file( lines 9-10) or use wget :
+      wget "http://nlp.stanford.edu/software/stanford-ner-2014-06-16.zip"
+2. unzip stanford-ner-2014-06-16.zip
+3. mv stanford-ner-2014-06-16 stanford-ner
+
+4.Download the nltk package specifically: 
+
+      nltk.download("words")
+      nltk.download('maxent_ne_chunker')
