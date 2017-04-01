@@ -6,4 +6,4 @@ currrent classifier:
 how to run:
 python ./question_classifier.py  ./data/train ./data/test/
 
-
+The question classifier woudl add a tag "type" into the question features!!!
