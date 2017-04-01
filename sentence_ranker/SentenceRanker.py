@@ -35,11 +35,14 @@ class SentenceRanker2():
         intersection_set = str1_set.intersection(str2_set)
         return float(len(intersection_set)) / (len(str1_set) + len(str2_set) - len(intersection_set))
 
+    def get_data(self):
+        return self.data
 
 def main():
     sentence_ranker = SentenceRanker2(sys.argv[1])
     sentence_ranker.rank_by_jaccard_similarity()
-    print 'hi'
+    mydata = sentence_ranker.get_data()
+    print mydata
 
 
 if __name__ == '__main__':
