@@ -24,7 +24,7 @@ class SentenceRanker():
             candidates = filter(lambda x: x['id'] != 'A' and x['id'] != 'Q', annotations)
             scores = [self.jaccard_similartiy(x['features']['target'], question[0]['features']['target']) for x in
                       candidates]
-            ranks = sorted(range(len(scores)), key=lambda x: scores[x])
+            ranks = sorted(range(len(scores)), key=lambda x: -scores[x])
             for i in range(len(scores)):
                 candidates[i]['features']['rank'] = ranks[i]
             each_view['annotations'] = [x for x in annotations if
