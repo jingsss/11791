@@ -28,7 +28,11 @@ def tokenize(sent):
 def pos_tags(text):
     #text =  tokenize(sent)
     text2 = nltk.pos_tag(text)
-    return text2
+    poss= []
+    for a in text2:
+        poss.append(a[1])
+    # print poss
+    return poss
 
 
 def named_ent1(sent):
@@ -52,17 +56,38 @@ def norms(k):
 
 # using Stnaford NER Tagger 7 class 
 # check for organizations 
-def get_entity_old(k2, ent):
-    l = []
-    for x in k2:
-        if x[1] == ent:
-            # print x[0]
-            l.append(x[0].encode('ascii','ignore'))
-    return l
+# def get_entity_old(k2, ent):
+#     l = []
+#     for x in k2:
+#         if x[1] == ent:
+#             # print x[0]
+#             l.append(x[0].encode('ascii','ignore'))
+#     return l
 
 
-def get_entity(k2, ent):
+# def get_entity(k2, ent):
+#     l = []
+#     s = ""
+#     for x in k2:
+#         if x[1] == ent:
+#             #print x[0]
+#             s += x[0].encode('ascii','ignore') +" "
+#         else:
+#             if s == "":
+#                 continue
+#             else:
+#                 #print s
+#                 l.append(s)
+#                 s = ""
+#             #l.append(x[0].encode('ascii','ignore'))
+#     if s != "":
+#         l.append(s)
+    
+#     #print l
+#     return l
+def get_entity_mod(k2, ent):
     l = []
+    tok_mod = []
     s = ""
     for x in k2:
         if x[1] == ent:
@@ -70,26 +95,43 @@ def get_entity(k2, ent):
             s += x[0].encode('ascii','ignore') +" "
         else:
             if s == "":
+                tok_mod.append(x)
                 continue
             else:
                 #print s
                 l.append(s)
+                tok_mod.append((s,ent))
                 s = ""
             #l.append(x[0].encode('ascii','ignore'))
+
     if s != "":
         l.append(s)
-    
+        tok_mod.append((s,ent))
+    # print tok_mod
     #print l
-    return l
-def all_entity(k2):
+    return l,tok_mod
 
-    l_org = get_entity(k2,"ORGANIZATION")
-    l_date = get_entity(k2,"DATE")
-    l_person= get_entity(k2,"PERSON")
-    l_loc = get_entity(k2,"LOCATION")
-    l_percent = get_entity(k2,"PERCENT")
-    l_time = get_entity(k2,"TIME")
-    return l_org, l_date, l_person, l_loc, l_percent, l_time
+def all_entity(k2):
+    # print k2
+    # print "###############################################"
+    l_org,k2 = get_entity_mod(k2,"ORGANIZATION")
+    # print k2
+    # print "###############################################"
+    l_date,k2 = get_entity_mod(k2,"DATE")
+    # print k2
+    # print "###############################################"
+    l_person,k2= get_entity_mod(k2,"PERSON")
+    # print k2
+    # print "###############################################"
+    l_loc,k2 = get_entity_mod(k2,"LOCATION")
+    # print k2
+    # print "###############################################"
+    l_percent,k2 = get_entity_mod(k2,"PERCENT")
+    # print k2
+    # print "###############################################"
+    l_time, k2 = get_entity_mod(k2,"TIME")
+    # print "###############################################"
+    return l_org, l_date, l_person, l_loc, l_percent, l_time,k2
 
 
 def hasNumbers(k):
@@ -109,16 +151,25 @@ def create_annotations(sentence):
     final_ans = {}
     tokens = tokenize(S)
     k2 = named_ent2(sentence)
-    final_ans['tokens'] = tokens
-    final_ans['pos'] = pos_tags(tokens)
-    l_org, l_date, l_person, l_loc, l_percent, l_time = all_entity(k2)
-    final_ans['is_num'] = hasNumbers(k2)
+    # final_ans['tokens'] = tokens
+    # final_ans['pos'] = pos_tags(tokens)
+    l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
+    # final_ans['is_num'] = hasNumbers(k2)
     final_ans['ORG'] = l_org
     final_ans['PERSON'] = l_person
     final_ans['DATE'] = l_date
     final_ans['LOCATION'] = l_loc
     final_ans['TIME'] = l_time
     final_ans['PERCENT'] = l_percent
+    new_tok = []
+    for x in mod_tok:
+        new_tok.append(x[0])
+    final_ans['tokens'] = new_tok
+
+    # print final_ans['tokens']
+    final_ans['pos'] = pos_tags(new_tok)
+    final_ans['is_num'] = hasNumbers(new_tok)
+
     return final_ans
 
 S ="Jack studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University "
