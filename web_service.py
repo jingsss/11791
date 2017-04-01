@@ -142,14 +142,15 @@ def token_annotator():
 				a["features"]["PERSON"] = info["PERSON"]
 	return jsonify(t)
 
-@app.route("/question_annotator",methods=['GET', 'POST'])
-def question_annotator():
-	t = request.json
-	return jsonify("question_annotator")
+
 
 @app.route("/question_classifier",methods=['GET', 'POST'])
-def question_classifier_handle():
-	res = question_classify(request.json)
+def question_classifier():
+	t = request.json
+	for view in t["payload"]["views"]:
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/question_classifier"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "question classifier component"
+	res = question_classify(t)
         #t = request.json
         #print res
 	return jsonify(res)
