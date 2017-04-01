@@ -5,8 +5,11 @@ from collections import OrderedDict
 import sys
 import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
-sys.path.append(sys.path[0] + "/sentence_ranker")
+path = sys.path[0]
+sys.path.append(path + "/sentence_ranker")
 from SentenceRanker import *
+sys.path.append(path + "/annotations")
+from annotator import *
 
 class StanfordNLP:
 	def __init__(self):
@@ -97,14 +100,13 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		view["annotations"].append(ann)
 #		faster
 #		coref_list = coref(q_a["passage"][0])
-		sentences = q_a["passage"][0].lower().strip().split(".")
+		sentences = q_a["passage"][0].strip().split(".")
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
 			ann = new_annotation('S' + str(i), uri_type)
 			ann['features']['target'] = sentences[i].strip()
 			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
-
 #			ann['features']['coref'] = get_coref(coref_list, i)
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
@@ -128,17 +130,27 @@ def token_annotator():
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "token annotator component"
 		for a in view["annotations"]:
 			if a["features"]["type"] != ANS:
-				a["features"]["tokens"] = a["features"]["target"].split()
+				info = create_annotations(a["features"]["target"])
+				a["features"]["tokens"] = info["tokens"]
+				a["features"]["is_num"] = info["is_num"]
+				a["features"]["pos"] = info["pos"]
+				a["features"]["PERCENT"] = info["PERCENT"]
+				a["features"]["TIME"] = info["TIME"]
+				a["features"]["DATE"] = info["DATE"]
+				a["features"]["ORG"] = info["ORG"]
+				a["features"]["LOCATION"] = info["LOCATION"]
+				a["features"]["PERSON"] = info["PERSON"]
 	return jsonify(t)
 
-@app.route("/question_annotator",methods=['GET', 'POST'])
-def question_annotator():
-	t = request.json
-	return jsonify("question_annotator")
+
 
 @app.route("/question_classifier",methods=['GET', 'POST'])
-def question_classifier_handle():
-	res = question_classify(request.json)
+def question_classifier():
+	t = request.json
+	for view in t["payload"]["views"]:
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/question_classifier"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "question classifier component"
+	res = question_classify(t)
         #t = request.json
         #print res
 	return jsonify(res)
@@ -149,7 +161,6 @@ def sentence_ranker():
 	sentence_ranker = SentenceRanker(t)
 	sentence_ranker.rank_by_jaccard_similarity()
 	data = sentence_ranker.get_data()
-	#print data
 	return jsonify(data)
 if __name__ == "__main__":
 	app.run()
