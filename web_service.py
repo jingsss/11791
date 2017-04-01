@@ -4,6 +4,9 @@ import requests
 from collections import OrderedDict
 import jsonrpc
 from simplejson import loads
+import sys
+sys.path.insert(0, './question-classification/question-classifier')
+from question_classifier import question_classify
 
 URI_SENTENCE = "http://vocab.lappsgrid.org/Sentence"
 SERVER = "http://127.0.0.1:5000/"
@@ -39,10 +42,10 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	return annotation
 def coref(passage):
 	server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),jsonrpc.TransportTcpIp(addr=("127.0.0.1", 8080)))
-	print passage
-        print server.parse(passage)
+	#print passage
+        #print server.parse(passage)
         result = loads(server.parse(passage))
-	print result['coref']
+	#print result['coref']
 
 def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	data = init_container_as_dict()
@@ -107,6 +110,12 @@ def question_annotator():
 	t = request.json
 	return jsonify("question_annotator")
 
+@app.route("/question_classifier",methods=['GET', 'POST'])
+def question_classifier_handle():
+	res = question_classify(request.json)
+        #t = request.json
+        print res
+	return jsonify(res)
 
 if __name__ == "__main__":
 	app.run()
