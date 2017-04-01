@@ -42,8 +42,8 @@ def named_ent1(sent):
     #namedEnt.draw()
     return namedEnt
 
-def named_ent2(sent):
-    tagged = tokenize(sent)
+def named_ent2(tagged):
+    # tagged = tokenize(sent)
     namedEnt = st.tag(tagged)
     #print namedEnt
     #namedEnt.draw()
@@ -99,13 +99,23 @@ def get_entity_mod(k2, ent):
                 continue
             else:
                 #print s
-                l.append(s)
+                if s[-1] == " ":
+                    s2 = s[:-1]
+                else:
+                    s2 = s
+
+                l.append(s2)
+                
                 tok_mod.append((s,ent))
                 s = ""
             #l.append(x[0].encode('ascii','ignore'))
 
     if s != "":
-        l.append(s)
+        if s[-1] == " ":
+            s2 = s[:-1]
+        else:
+            s2 = s
+        l.append(s2)
         tok_mod.append((s,ent))
     # print tok_mod
     #print l
@@ -150,7 +160,10 @@ def create_annotations(sentence):
 
     final_ans = {}
     tokens = tokenize(sentence)
-    k2 = named_ent2(sentence)
+    tokens = [w.replace('pm', 'p.m.') for w in tokens]
+    tokens = [w.replace('am', 'a.m.') for w in tokens]
+    
+    k2 = named_ent2(tokens)
     # final_ans['tokens'] = tokens
     # final_ans['pos'] = pos_tags(tokens)
     l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
@@ -163,7 +176,13 @@ def create_annotations(sentence):
     final_ans['PERCENT'] = l_percent
     new_tok = []
     for x in mod_tok:
-        new_tok.append(x[0])
+        if x[0][-1] == " "  :
+            s2 = x[0][:-1]
+        else:
+            s2 = x[0]
+
+        new_tok.append(s2)
+        
     final_ans['tokens'] = new_tok
 
     # print final_ans['tokens']
