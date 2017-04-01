@@ -2,9 +2,15 @@ from flask import Flask,jsonify,request
 import urllib, json
 import requests
 from collections import OrderedDict
-import jsonrpc
-from simplejson import loads
 import sys
+import json
+from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
+class StanfordNLP:
+	def __init__(self):
+		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
+	def parse(self, text):
+		return json.loads(self.server.parse(text))
+
 sys.path.insert(0, './question-classification/question-classifier')
 from question_classifier import question_classify
 
@@ -15,6 +21,11 @@ QUES = "Question"
 SENS = "Sentence"
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
+def extract_pair(p):
+	idx = [i[1] for i in p]
+	group = [i[0] for i in p]
+	return [idx,group]
+	
 def init_container_as_dict():
 	data = {}
 	data['discriminator'] = "http://vocab.lappsgrid.org/ns/media/jsonld#lif"
@@ -41,12 +52,22 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	annotation["features"] = {}
 	return annotation
 def coref(passage):
-	server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),jsonrpc.TransportTcpIp(addr=("127.0.0.1", 8080)))
-	#print passage
-        #print server.parse(passage)
-        result = loads(server.parse(passage))
-	#print result['coref']
+	nlp = StanfordNLP()
+	result = nlp.parse(passage)
+#	result = nlp.parse("To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France")
+	coref = []
+	for i in result['coref']:
+		idx = [extract_pair(a)[1] for a in i]
+		idx = [item for sublist in idx for item in sublist]
+		phrase = [extract_pair(a)[0] for a in i]
+		phrase= [item for sublist in phrase for item in sublist]
+		coref.append([idx, phrase])
+	return coref
 
+def get_coref(coref_list,i):
+	c_list = [list(set(c[0])) for c in coref_list if i in c[1]]
+	return c_list
+	
 def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	data = init_container_as_dict()
 	for q_a in jsonobj["response"]["docs"]:
@@ -71,15 +92,17 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		ann['features']['type'] = ANS
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
-		#annotate passage
-		#coref(q_a["passage"][0])
-		sentences = q_a["passage"][0].strip().split(".")
+		
+		coref_list = coref(q_a["passage"][0])
+		sentences = q_a["passage"][0].lower().strip().split(".")
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
 			ann = new_annotation('S' + str(i), uri_type)
 			ann['features']['target'] = sentences[i].strip()
 			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
+			
+			ann['features']['coref'] = get_coref(coref_list, i)
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
@@ -98,8 +121,8 @@ def input_component():
 def token_annotator():
 	t = request.json
 	for view in t["payload"]["views"]:
-		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/annotator"
-		view["metadata"]["contains"][URI_SENTENCE]["type"] = "annotator component"
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/token_annotator"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "token annotator component"
 		for a in view["annotations"]:
 			if a["features"]["type"] != ANS:
 				a["features"]["tokens"] = a["features"]["target"].split()
