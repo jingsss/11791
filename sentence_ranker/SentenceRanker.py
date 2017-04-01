@@ -3,16 +3,17 @@ import sys
 import json
 
 
-class SentenceRanker2():
+class SentenceRanker():
     def __init__(self, jsonobj):
         """
         :param sentence_view: json file format of sentence view
         :param token_view: json file format of token view
         """
-        self.jsonobj = jsonobj
-        self.top_k = 5  # rank the sentences s.t. we only consider top k candidates
-        with open(self.jsonobj) as data_file:
-            self.data = json.load(data_file)
+        # self.jsonobj = jsonobj
+        # self.top_k = 5  # rank the sentences s.t. we only consider top k candidates
+        # with open(self.jsonobj) as data_file:
+        #     self.data = json.load(data_file)
+        self.data = jsonobj
 
     def rank_by_jaccard_similarity(self):
         all_views = self.data['payload']['views']
@@ -39,10 +40,12 @@ class SentenceRanker2():
         return self.data
 
 def main():
-    sentence_ranker = SentenceRanker2(sys.argv[1])
-    sentence_ranker.rank_by_jaccard_similarity()
-    mydata = sentence_ranker.get_data()
-    print mydata
+    # sentence_ranker = SentenceRanker(sys.argv[1])
+    # sentence_ranker.rank_by_jaccard_similarity()
+    # mydata = sentence_ranker.get_data()
+    # print mydata
+    print 'hi'
+
 
 
 if __name__ == '__main__':
