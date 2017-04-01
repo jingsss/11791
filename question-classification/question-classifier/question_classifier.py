@@ -85,20 +85,28 @@ def question_classify(inputs):
     #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
     print "question classifier input :  \n"
     #print inputs
-    print json.dumps(inputs, indent=4, sort_keys=True)
+    #print json.dumps(inputs, indent=4, sort_keys=True)
     #ress =  json.loads(str(inputs))
     #for item in ress["payload"]["views"]["annotations"]:
     #    print item
+
+
     test_set = list()
-    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
-    print test_set
+    for view in  inputs['payload']['views']:
+        for anno in  view['annotations']:
+            if anno['id'] == "Q":
+                print     anno['features']['target']
+
+                test_set.append(anno['features']['target'])
+                print test_set
 
 
-    y_predicted = question_classifier_predict(test_set)
-    print y_predicted
-    inputs['payload']['views'][0]['annotations'][0]['features']['type'] = str(res_cat[y_predicted])
-    print json.dumps(inputs, indent=4, sort_keys=True)
-    print y_predicted
+                y_predicted = question_classifier_predict(test_set)
+                print y_predicted
+                anno['features']['type'] = str(res_cat[y_predicted])
+                del test_set[:]
+    #print json.dumps(inputs, indent=4, sort_keys=True)
+    #print y_predicted
     return inputs
 
 #def question_classify_main(inputs):

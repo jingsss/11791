@@ -28,7 +28,7 @@ def extract_pair(p):
 	idx = [i[1] for i in p]
 	group = [i[0] for i in p]
 	return [idx,group]
-	
+
 def init_container_as_dict():
 	data = {}
 	data['discriminator'] = "http://vocab.lappsgrid.org/ns/media/jsonld#lif"
@@ -70,7 +70,7 @@ def coref(passage):
 def get_coref(coref_list,i):
 	c_list = [list(set(c[0])) for c in coref_list if i in c[1]]
 	return c_list
-	
+
 def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	data = init_container_as_dict()
 	for q_a in jsonobj["response"]["docs"]:
@@ -104,7 +104,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 			ann['features']['target'] = sentences[i].strip()
 			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
-			
+
 #			ann['features']['coref'] = get_coref(coref_list, i)
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
@@ -140,16 +140,16 @@ def question_annotator():
 def question_classifier_handle():
 	res = question_classify(request.json)
         #t = request.json
-        print res
+        #print res
 	return jsonify(res)
-	
+
 @app.route("/sentence_ranker",methods=['GET', 'POST'])
 def sentence_ranker():
 	t = request.json
 	sentence_ranker = SentenceRanker(t)
 	sentence_ranker.rank_by_jaccard_similarity()
 	data = sentence_ranker.get_data()
-	print data
+	#print data
 	return jsonify(data)
 if __name__ == "__main__":
 	app.run()
