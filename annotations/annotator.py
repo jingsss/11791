@@ -149,7 +149,7 @@ def hasNumbers(k):
 def create_annotations(sentence):
 
     final_ans = {}
-    tokens = tokenize(S)
+    tokens = tokenize(sentence)
     k2 = named_ent2(sentence)
     # final_ans['tokens'] = tokens
     # final_ans['pos'] = pos_tags(tokens)
@@ -172,6 +172,6 @@ def create_annotations(sentence):
 
     return final_ans
 
-S ="Jack studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University "
+S ="Jack Brown studies at Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University. He is a student"
 print create_annotations(S)
 

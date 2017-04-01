@@ -15,9 +15,16 @@ class SentenceRanker2():
 
 
     def rank_by_jaccard_similarity(self):
-        annotations = self.data['payload']['views']['annotations']
-        question = annotations
-        print 'hi'
+        all_views = self.data['payload']['views']
+        for each_view in all_views:
+            annotations = each_view['annotations']
+            question = filter(lambda x: x['id'] == 'Q', annotations)
+            ground_truth = filter(lambda x: x['id'] == 'A', annotations)
+            candidates = filter(lambda x: x['id'] != 'A' and x['id'] != 'Q', annotations)
+            scores = [self.jaccard_similartiy(x['features']['target'], question[0]['features']['target']) for x in candidates]
+            ranks = sorted(range(len(scores)), key=lambda x: scores[x])
+            for i in range(len(scores)):
+                candidates[i]['features']['rank'] = ranks[i]
         pass
 
     def rank_by_bm25(self):

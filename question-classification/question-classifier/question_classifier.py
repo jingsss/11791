@@ -11,10 +11,10 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.datasets import load_files
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
-
+from sklearn.externals import joblib
 import urllib2
 
-def question_classify(docs_train, y_train, docs_test1):
+def question_classifier_train(docs_train, y_train, docs_test1):
 
 
     pipeline = Pipeline([
@@ -36,26 +36,84 @@ def question_classify(docs_train, y_train, docs_test1):
         #'clf__n_iter': (10, 50, 80),
     }
 
-    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
-    grid_search.fit(docs_train, y_train)
+    #grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
+    #grid_search.fit(docs_train, y_train)
+    filename = './classifier.joblib.pkl'
+    #_ = joblib.dump(grid_search, filename, compress=9)
+    grid_search = joblib.load(filename)
 
-    print(grid_search.grid_scores_)
+    #print(grid_search.grid_scores_)
 
     #Predict the outcome on the testing set and store it in a variable
     # named y_predicted
     y_predicted = grid_search.predict(docs_test1)
     return y_predicted
 
-if __name__ == "__main__":
-    res = urllib2.urlopen("http://127.0.0.1:8080/pipeline?row=1").read()
-    ress =  json.loads(res)
+
+
+def question_classifier_predict(docs_test1):
+
+
+    pipeline = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', SGDClassifier()),
+    ])
+
+    # uncommenting more parameters will give better exploring power but will
+    # increase processing time in a combinatorial way
+    parameters = {
+        'vect__max_df': (0.5, 0.75, 1.0),
+        #'vect__max_features': (None, 5000, 10000, 50000),
+        'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),  # unigrams or bigrams
+        #'tfidf__use_idf': (True, False),
+        #'tfidf__norm': ('l1', 'l2'),
+        'clf__alpha': (0.00001, 0.000001),
+        'clf__penalty': ('l2', 'elasticnet'),
+        #'clf__n_iter': (10, 50, 80),
+    }
+
+    filename = './classifier.joblib.pkl'
+    grid_search = joblib.load(filename)
+    y_predicted = grid_search.predict(docs_test1)
+    return y_predicted
+
+
+def question_classify(inputs):
+
+    res_cat = ['ABBR','DESC','ENTY','HUM','LOC','NUM']
+    #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
+    print "question classifier input :  \n"
+    #print inputs
+    print json.dumps(inputs, indent=4, sort_keys=True)
+    #ress =  json.loads(str(inputs))
+    #for item in ress["payload"]["views"]["annotations"]:
+    #    print item
+    test_set = list()
+    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
+    print test_set
+
+
+    y_predicted = question_classifier_predict(test_set)
+    print y_predicted
+    inputs['payload']['views'][0]['annotations'][0]['features']['type'] = str(res_cat[y_predicted])
+    print json.dumps(inputs, indent=4, sort_keys=True)
+    print y_predicted
+    return inputs
+
+def question_classify_main(inputs):
+    #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
+    print "question classifier input :  \n"
+    print inputs
+    #ress =  json.loads(str(inputs))
     #for item in ress["payload"]["views"]["annotations"]:
     #    print item
 
-    print json.dumps(ress['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True)
+    test_set = list()
+    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
 
 
-    sys.exit(0)
+    #sys.exit(0)
     # the training data folder must be passed as first argument
     questions_data_folder = sys.argv[1]
     dataset = load_files(questions_data_folder, shuffle=False)
@@ -73,21 +131,22 @@ if __name__ == "__main__":
     # split the dataset in training and test set:
     _, docs_test1, _, y_test = train_test_split(
         dataset1.data, dataset1.target, test_size=499, random_state=None)
-    print y_test
-    print docs_test1
+    #print y_test
+    #print docs_test1
+    #print type( docs_test1)
 
-    y_predicted = question_classify(docs_train, y_train, docs_test1)
+    y_predicted = question_classifier_train(docs_train, y_train, test_set)
     print "+++++++++++++++++++++++++++"
     print y_predicted
     print len(y_predicted)
     print "+++++++++++++++++++++++++++"
     # Print the classification report
-    print(metrics.classification_report(y_test, y_predicted,
-                                        target_names=dataset.target_names))
+    #print(metrics.classification_report(y_test, y_predicted,
+    #                                    target_names=dataset.target_names))
 
     # Print and plot the confusion matrix
-    cm = metrics.confusion_matrix(y_test, y_predicted)
-    print(cm)
+    #cm = metrics.confusion_matrix(y_test, y_predicted)
+    #print(cm)
 
     #import matplotlib.pyplot as plt
     #plt.matshow(cm)
