@@ -5,6 +5,9 @@ from collections import OrderedDict
 import sys
 import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
+sys.path.append(sys.path[0] + "/sentence_ranker")
+from SentenceRanker import *
+
 class StanfordNLP:
 	def __init__(self):
 		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
@@ -92,8 +95,8 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		ann['features']['type'] = ANS
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
-		
-		coref_list = coref(q_a["passage"][0])
+#		faster
+#		coref_list = coref(q_a["passage"][0])
 		sentences = q_a["passage"][0].lower().strip().split(".")
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
@@ -102,7 +105,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
 			
-			ann['features']['coref'] = get_coref(coref_list, i)
+#			ann['features']['coref'] = get_coref(coref_list, i)
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
@@ -139,6 +142,14 @@ def question_classifier_handle():
         #t = request.json
         print res
 	return jsonify(res)
-
+	
+@app.route("/sentence_ranker",methods=['GET', 'POST'])
+def sentence_ranker():
+	t = request.json
+	sentence_ranker = SentenceRanker(t)
+	sentence_ranker.rank_by_jaccard_similarity()
+	data = sentence_ranker.get_data()
+	print data
+	return jsonify(data)
 if __name__ == "__main__":
 	app.run()

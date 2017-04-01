@@ -20,11 +20,12 @@ def pipeline():
 	input_component = "http://127.0.0.1:5000/input_component"
 	annotator = "http://127.0.0.1:5000/token_annotator"
 	question_classifier_url = "http://127.0.0.1:5000/question_classifier"
+	sentence_ranker_url = "http://127.0.0.1:5000/sentence_ranker"
 	r = requests.get(source_url)
         #print r
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
-	obj = get_from_component(obj, annotator)
+	obj = get_from_component(obj, sentence_ranker_url)
 #	obj = get_from_component(obj, question_classifier_url)
 #        print obj
 	return jsonify(obj)

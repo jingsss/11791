@@ -10,7 +10,7 @@ class SentenceRanker():
         :param token_view: json file format of token view
         """
         # self.jsonobj = jsonobj
-        # self.top_k = 5  # rank the sentences s.t. we only consider top k candidates
+        self.top_k = 5  # rank the sentences s.t. we only consider top k candidates
         # with open(self.jsonobj) as data_file:
         #     self.data = json.load(data_file)
         self.data = jsonobj
