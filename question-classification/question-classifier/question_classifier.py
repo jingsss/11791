@@ -36,13 +36,13 @@ def question_classifier_train(docs_train, y_train, docs_test1):
         #'clf__n_iter': (10, 50, 80),
     }
 
-    #grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
-    #grid_search.fit(docs_train, y_train)
+    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
+    grid_search.fit(docs_train, y_train)
     filename = './classifier.joblib.pkl'
-    #_ = joblib.dump(grid_search, filename, compress=9)
-    grid_search = joblib.load(filename)
+    _ = joblib.dump(grid_search, filename, compress=9)
+    #grid_search = joblib.load(filename)
 
-    #print(grid_search.grid_scores_)
+    print(grid_search.grid_scores_)
 
     #Predict the outcome on the testing set and store it in a variable
     # named y_predicted
@@ -85,39 +85,45 @@ def question_classify(inputs):
     #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
     print "question classifier input :  \n"
     #print inputs
-    print json.dumps(inputs, indent=4, sort_keys=True)
+    #print json.dumps(inputs, indent=4, sort_keys=True)
     #ress =  json.loads(str(inputs))
     #for item in ress["payload"]["views"]["annotations"]:
     #    print item
+
+
     test_set = list()
-    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
-    print test_set
+    for view in  inputs['payload']['views']:
+        for anno in  view['annotations']:
+            if anno['id'] == "Q":
+                print     anno['features']['target']
+
+                test_set.append(anno['features']['target'])
+                print test_set
 
 
-    y_predicted = question_classifier_predict(test_set)
-    print y_predicted
-    inputs['payload']['views'][0]['annotations'][0]['features']['type'] = str(res_cat[y_predicted])
-    print json.dumps(inputs, indent=4, sort_keys=True)
-    print y_predicted
+                y_predicted = question_classifier_predict(test_set)
+                print y_predicted
+                anno['features']['type'] = str(res_cat[y_predicted])
+                del test_set[:]
+    #print json.dumps(inputs, indent=4, sort_keys=True)
+    #print y_predicted
     return inputs
 
-def question_classify_main(inputs):
-    #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
+#def question_classify_main(inputs):
+
+if __name__ == "__main__":
     print "question classifier input :  \n"
-    print inputs
-    #ress =  json.loads(str(inputs))
-    #for item in ress["payload"]["views"]["annotations"]:
-    #    print item
-
-    test_set = list()
-    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
 
 
-    #sys.exit(0)
-    # the training data folder must be passed as first argument
+
     questions_data_folder = sys.argv[1]
     dataset = load_files(questions_data_folder, shuffle=False)
     print("n  training samples: %d" % len(dataset.data))
+
+    with open(fname) as f:
+        content = f.readlines()
+    # you may also want to remove whitespace characters like `\n` at the end of each line
+    content = [x.strip() for x in content]
 
     # split the dataset in training and test set:
     docs_train, _, y_train, _ = train_test_split(
@@ -131,23 +137,17 @@ def question_classify_main(inputs):
     # split the dataset in training and test set:
     _, docs_test1, _, y_test = train_test_split(
         dataset1.data, dataset1.target, test_size=499, random_state=None)
-    #print y_test
-    #print docs_test1
-    #print type( docs_test1)
 
-    y_predicted = question_classifier_train(docs_train, y_train, test_set)
+    y_predicted = question_classifier_train(docs_train, y_train, docs_test1)
     print "+++++++++++++++++++++++++++"
     print y_predicted
     print len(y_predicted)
     print "+++++++++++++++++++++++++++"
     # Print the classification report
-    #print(metrics.classification_report(y_test, y_predicted,
-    #                                    target_names=dataset.target_names))
+    print(metrics.classification_report(y_test, y_predicted,
+                                        target_names=dataset.target_names))
 
     # Print and plot the confusion matrix
-    #cm = metrics.confusion_matrix(y_test, y_predicted)
-    #print(cm)
+    cm = metrics.confusion_matrix(y_test, y_predicted)
+    print(cm)
 
-    #import matplotlib.pyplot as plt
-    #plt.matshow(cm)
-    #plt.show()
