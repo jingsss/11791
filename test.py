@@ -1,8 +1,16 @@
-import jsonrpc
-from simplejson import loads
-server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),
-                             jsonrpc.TransportTcpIp(addr=("127.0.0.1", 8080)))
+from pycorenlp import StanfordCoreNLP
 
-sentence1 = "University of Michigan is a large university. It is one of the largerst universities in U.S."
-result = loads(server.parse(sentence1))
-print result['coref']
+if __name__ == '__main__':
+	nlp = StanfordCoreNLP('http://localhost:9000')
+	text = (
+		'Pusheen and Smitha walked along the beach. Pusheen wanted to surf,'
+		'but fell off the surfboard.')
+	output = nlp.annotate(text, properties={
+		'annotators': 'tokenize,ssplit,pos,depparse,parse',
+		'outputFormat': 'json'
+	})
+	print(output['sentences'][0]['parse'])
+	output = nlp.tokensregex(text, pattern='/Pusheen|Smitha/', filter=False)
+	print(output)
+	output = nlp.semgrex(text, pattern='{tag: VBD}', filter=False)
+	print(output)
