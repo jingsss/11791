@@ -39,9 +39,11 @@ def new_annotation(aid,uri_type,start = -1 ,end = -1):
 	return annotation
 def coref(passage):
 	server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),jsonrpc.TransportTcpIp(addr=("127.0.0.1", 8080)))
-	result = loads(server.parse(passage))
+	print passage
+        print server.parse(passage)
+        result = loads(server.parse(passage))
 	print result['coref']
-	
+
 def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 	data = init_container_as_dict()
 	for q_a in jsonobj["response"]["docs"]:
@@ -67,7 +69,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		ann['features']['squad_id'] = q_a["id"]
 		view["annotations"].append(ann)
 		#annotate passage
-		coref(q_a["passage"][0])
+		#coref(q_a["passage"][0])
 		sentences = q_a["passage"][0].strip().split(".")
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
@@ -88,7 +90,7 @@ def input_component():
 	t = request.json
 	data = parse_element(t,"/input_component",URI_SENTENCE)
 	return jsonify(data)
-	
+
 @app.route("/token_annotator",methods=['GET', 'POST'])
 def token_annotator():
 	t = request.json
@@ -100,11 +102,11 @@ def token_annotator():
 				a["features"]["tokens"] = a["features"]["target"].split()
 	return jsonify(t)
 
-@app.route("/question_annotator",methods=['GET', 'POST'])	
+@app.route("/question_annotator",methods=['GET', 'POST'])
 def question_annotator():
 	t = request.json
 	return jsonify("question_annotator")
-	
+
 
 if __name__ == "__main__":
 	app.run()

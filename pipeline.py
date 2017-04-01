@@ -10,9 +10,10 @@ def get_from_component(obj, url):
 	r = requests.post(url, data=json.dumps(obj), headers=headers)
 	obj = r.json()
 	return obj
-	
-@app.route("/pipeline",methods=['GET', 'POST'])	
+
+@app.route("/pipeline",methods=['GET', 'POST'])
 def pipeline():
+        print request
 	row = int(request.args.get('row'))
 #	f = "&q=fold:1"
 	f = ""
@@ -20,6 +21,7 @@ def pipeline():
 	input_component = "http://127.0.0.1:5000/input_component"
 	annotator = "http://127.0.0.1:5000/token_annotator"
 	r = requests.get(source_url)
+        print r
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
 	obj = get_from_component(obj, annotator)

@@ -11,7 +11,7 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.datasets import load_files
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
-
+from sklearn.externals import joblib
 import urllib2
 
 def question_classify(docs_train, y_train, docs_test1):
@@ -36,10 +36,13 @@ def question_classify(docs_train, y_train, docs_test1):
         #'clf__n_iter': (10, 50, 80),
     }
 
-    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
-    grid_search.fit(docs_train, y_train)
+    #grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
+    #grid_search.fit(docs_train, y_train)
+    filename = './classifier.joblib.pkl'
+    #_ = joblib.dump(grid_search, filename, compress=9)
+    grid_search = joblib.load(filename)
 
-    print(grid_search.grid_scores_)
+    #print(grid_search.grid_scores_)
 
     #Predict the outcome on the testing set and store it in a variable
     # named y_predicted
@@ -51,11 +54,11 @@ if __name__ == "__main__":
     ress =  json.loads(res)
     #for item in ress["payload"]["views"]["annotations"]:
     #    print item
+    test_set = list()
+    test_set.append(json.dumps(ress['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
 
-    print json.dumps(ress['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True)
 
-
-    sys.exit(0)
+    #sys.exit(0)
     # the training data folder must be passed as first argument
     questions_data_folder = sys.argv[1]
     dataset = load_files(questions_data_folder, shuffle=False)
@@ -73,21 +76,22 @@ if __name__ == "__main__":
     # split the dataset in training and test set:
     _, docs_test1, _, y_test = train_test_split(
         dataset1.data, dataset1.target, test_size=499, random_state=None)
-    print y_test
-    print docs_test1
+    #print y_test
+    #print docs_test1
+    #print type( docs_test1)
 
-    y_predicted = question_classify(docs_train, y_train, docs_test1)
+    y_predicted = question_classify(docs_train, y_train, test_set)
     print "+++++++++++++++++++++++++++"
     print y_predicted
     print len(y_predicted)
     print "+++++++++++++++++++++++++++"
     # Print the classification report
-    print(metrics.classification_report(y_test, y_predicted,
-                                        target_names=dataset.target_names))
+    #print(metrics.classification_report(y_test, y_predicted,
+    #                                    target_names=dataset.target_names))
 
     # Print and plot the confusion matrix
-    cm = metrics.confusion_matrix(y_test, y_predicted)
-    print(cm)
+    #cm = metrics.confusion_matrix(y_test, y_predicted)
+    #print(cm)
 
     #import matplotlib.pyplot as plt
     #plt.matshow(cm)
