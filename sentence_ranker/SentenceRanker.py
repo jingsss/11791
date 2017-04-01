@@ -1,6 +1,7 @@
-from flask import Flask,jsonify,request
+from flask import Flask, jsonify, request
 import sys
 import json
+
 
 class SentenceRanker2():
     def __init__(self, jsonobj):
@@ -9,10 +10,9 @@ class SentenceRanker2():
         :param token_view: json file format of token view
         """
         self.jsonobj = jsonobj
-        self.top_k = 5 # rank the sentences s.t. we only consider top k candidates
+        self.top_k = 5  # rank the sentences s.t. we only consider top k candidates
         with open(self.jsonobj) as data_file:
             self.data = json.load(data_file)
-
 
     def rank_by_jaccard_similarity(self):
         all_views = self.data['payload']['views']
@@ -21,11 +21,13 @@ class SentenceRanker2():
             question = filter(lambda x: x['id'] == 'Q', annotations)
             ground_truth = filter(lambda x: x['id'] == 'A', annotations)
             candidates = filter(lambda x: x['id'] != 'A' and x['id'] != 'Q', annotations)
-            scores = [self.jaccard_similartiy(x['features']['target'], question[0]['features']['target']) for x in candidates]
+            scores = [self.jaccard_similartiy(x['features']['target'], question[0]['features']['target']) for x in
+                      candidates]
             ranks = sorted(range(len(scores)), key=lambda x: scores[x])
             for i in range(len(scores)):
                 candidates[i]['features']['rank'] = ranks[i]
-            each_view['annotations'] = [x for x in annotations if x['id'] == 'Q' or x['id'] == 'A' or x['features']['rank'] <= self.top_k - 1]
+            each_view['annotations'] = [x for x in annotations if
+                                        x['id'] == 'Q' or x['id'] == 'A' or x['features']['rank'] <= self.top_k - 1]
         pass
 
     def jaccard_similartiy(self, str1, str2):
@@ -33,10 +35,12 @@ class SentenceRanker2():
         intersection_set = str1_set.intersection(str2_set)
         return float(len(intersection_set)) / (len(str1_set) + len(str2_set) - len(intersection_set))
 
+
 def main():
     sentence_ranker = SentenceRanker2(sys.argv[1])
     sentence_ranker.rank_by_jaccard_similarity()
     print 'hi'
+
 
 if __name__ == '__main__':
     main()
