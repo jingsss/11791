@@ -14,7 +14,7 @@ from sklearn import metrics
 from sklearn.externals import joblib
 import urllib2
 
-def question_classify(docs_train, y_train, docs_test1):
+def question_classifier_train(docs_train, y_train, docs_test1):
 
 
     pipeline = Pipeline([
@@ -49,13 +49,68 @@ def question_classify(docs_train, y_train, docs_test1):
     y_predicted = grid_search.predict(docs_test1)
     return y_predicted
 
-if __name__ == "__main__":
-    res = urllib2.urlopen("http://127.0.0.1:8080/pipeline?row=1").read()
-    ress =  json.loads(res)
+
+
+def question_classifier_predict(docs_test1):
+
+
+    pipeline = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', SGDClassifier()),
+    ])
+
+    # uncommenting more parameters will give better exploring power but will
+    # increase processing time in a combinatorial way
+    parameters = {
+        'vect__max_df': (0.5, 0.75, 1.0),
+        #'vect__max_features': (None, 5000, 10000, 50000),
+        'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),  # unigrams or bigrams
+        #'tfidf__use_idf': (True, False),
+        #'tfidf__norm': ('l1', 'l2'),
+        'clf__alpha': (0.00001, 0.000001),
+        'clf__penalty': ('l2', 'elasticnet'),
+        #'clf__n_iter': (10, 50, 80),
+    }
+
+    filename = './classifier.joblib.pkl'
+    grid_search = joblib.load(filename)
+    y_predicted = grid_search.predict(docs_test1)
+    return y_predicted
+
+
+def question_classify(inputs):
+
+    res_cat = ['ABBR','DESC','ENTY','HUM','LOC','NUM']
+    #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
+    print "question classifier input :  \n"
+    #print inputs
+    print json.dumps(inputs, indent=4, sort_keys=True)
+    #ress =  json.loads(str(inputs))
     #for item in ress["payload"]["views"]["annotations"]:
     #    print item
     test_set = list()
-    test_set.append(json.dumps(ress['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
+    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
+    print test_set
+
+
+    y_predicted = question_classifier_predict(test_set)
+    print y_predicted
+    inputs['payload']['views'][0]['annotations'][0]['features']['type'] = str(res_cat[y_predicted])
+    print json.dumps(inputs, indent=4, sort_keys=True)
+    print y_predicted
+    return inputs
+
+def question_classify_main(inputs):
+    #res = urllib2.urlopen("http://127.0.0.1:8888/pipeline?row=" + row_num).read()
+    print "question classifier input :  \n"
+    print inputs
+    #ress =  json.loads(str(inputs))
+    #for item in ress["payload"]["views"]["annotations"]:
+    #    print item
+
+    test_set = list()
+    test_set.append(json.dumps(inputs['payload']['views'][0]['annotations'][0]['features']['target'], indent=4, sort_keys=True))
 
 
     #sys.exit(0)
@@ -80,7 +135,7 @@ if __name__ == "__main__":
     #print docs_test1
     #print type( docs_test1)
 
-    y_predicted = question_classify(docs_train, y_train, test_set)
+    y_predicted = question_classifier_train(docs_train, y_train, test_set)
     print "+++++++++++++++++++++++++++"
     print y_predicted
     print len(y_predicted)
