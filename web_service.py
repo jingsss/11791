@@ -107,10 +107,6 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 			ann['features']['target'] = sentences[i].strip()
 			ann['features']['type'] = SENS
 			ann['features']['squad_id'] = q_a["id"]
-<<<<<<< HEAD
-=======
-
->>>>>>> 0fc5c7d4a6a077659e8c1749686ae34c0dc68278
 #			ann['features']['coref'] = get_coref(coref_list, i)
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
