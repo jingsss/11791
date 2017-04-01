@@ -103,7 +103,7 @@ def question_classify(inputs):
 
                 y_predicted = question_classifier_predict(test_set)
 #                print y_predicted
-                anno['features']['type'] = str(res_cat[y_predicted[0]])
+                anno['features']['question_type'] = str(res_cat[y_predicted[0]])
                 del test_set[:]
     #print json.dumps(inputs, indent=4, sort_keys=True)
     #print y_predicted
