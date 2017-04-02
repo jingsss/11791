@@ -26,7 +26,7 @@ class SentenceRanker():
                       candidates]
             ranks = sorted(range(len(scores)), key=lambda x: -scores[x])
             for i in range(len(scores)):
-                candidates[i]['features']['rank'] = ranks[i]
+                candidates[ranks[i]]['features']['rank'] = i
             each_view['annotations'] = [x for x in annotations if
                                         x['id'] == 'Q' or x['id'] == 'A' or x['features']['rank'] <= self.top_k - 1]
         pass
