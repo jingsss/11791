@@ -27,6 +27,6 @@ def best_candidate(Sentence, Question):
 	num = [[i,len(list1[i])] for i in range(len(list1)) if list2[i] == min_overlap]
 	s = sorted(num, key = lambda x: -x[1])
 	return " ".join(list1[s[0][0]])
-Sentence2 = "It is a replica of the grotto at Lourdes France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858"
-Question = "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?"
-print best_candidate(Sentence2, Question)
+#Sentence2 = "It is a replica of the grotto at Lourdes France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858"
+#Question = "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?"
+#print best_candidate(Sentence2, Question)

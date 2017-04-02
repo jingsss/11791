@@ -220,7 +220,7 @@ def create_annotations(sentence):
 #print create_annotations(S)
 
 #
-S ="The Mitsubishi Electric Company Managing Director eat ramen"
-print create_annotations(S)
+#S ="The Mitsubishi Electric Company Managing Director eat ramen"
+#print create_annotations(S)
 
 

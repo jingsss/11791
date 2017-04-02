@@ -5,6 +5,7 @@ from collections import OrderedDict
 import sys
 import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
+from sliding_window import *
 path = sys.path[0]
 sys.path.append(path + "/sentence_ranker")
 from SentenceRanker import *
@@ -162,5 +163,22 @@ def sentence_ranker():
 	sentence_ranker.rank_by_jaccard_similarity()
 	data = sentence_ranker.get_data()
 	return jsonify(data)
+	
+@app.route("/answer_extractor",methods=['GET', 'POST'])
+def answer_extractor():
+	t = request.json
+	for view in t["payload"]["views"]:
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/answer_extractor"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "answers annotator component"
+		question = ""
+		for a in view["annotations"]:
+			if a["features"]["type"] == QUES:
+				question = a["features"]["target"]
+				break
+		for a in view["annotations"]:
+			if a["features"]["type"] == SENS:
+				sentence = a["features"]["target"]
+				a["features"]["best_candidate"] = best_candidate(sentence, question)
+	return jsonify(t)
 if __name__ == "__main__":
 	app.run()

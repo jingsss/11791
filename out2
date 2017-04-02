@@ -1,0 +1,95 @@
+{
+  "discriminator" : "http://vocab.lappsgrid.org/ns/media/jsonld#lif",
+  "payload" : {
+    "@context" : "http://vocab.lappsgrid.org/context-1.0.0.jsonld",
+    "metadata" : { },
+    "text" : { },
+    "views" : [ {
+      "annotations" : [ {
+        "features" : {
+          "type" : "Question",
+          "target" : "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?",
+          "squad_id" : "5733be284776f41900661182"
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "Q",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "type" : "Answer",
+          "target" : [ "Saint Bernadette Soubirous" ],
+          "squad_id" : "5733be284776f41900661182"
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "A",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "squad_id" : "5733be284776f41900661182",
+          "type" : "Sentence",
+          "target" : "Architecturally, the school has a Catholic character",
+          "rank" : 0
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "S0",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "squad_id" : "5733be284776f41900661182",
+          "type" : "Sentence",
+          "target" : "Atop the Main Building's gold dome is a golden statue of the Virgin Mary",
+          "rank" : 3
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "S1",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "squad_id" : "5733be284776f41900661182",
+          "type" : "Sentence",
+          "target" : "Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend \"Venite Ad Me Omnes\"",
+          "rank" : 4
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "S2",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "squad_id" : "5733be284776f41900661182",
+          "type" : "Sentence",
+          "target" : "Next to the Main Building is the Basilica of the Sacred Heart",
+          "rank" : 2
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "S3",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      }, {
+        "features" : {
+          "squad_id" : "5733be284776f41900661182",
+          "type" : "Sentence",
+          "target" : "Immediately behind the basilica is the Grotto, a Marian place of prayer and reflection",
+          "rank" : 1
+        },
+        "start" : -1,
+        "end" : -1,
+        "id" : "S4",
+        "@type" : "http://vocab.lappsgrid.org/Sentence"
+      } ],
+      "metadata" : {
+        "contains" : {
+          "http://vocab.lappsgrid.org/Sentence" : {
+            "type" : "input component",
+            "producer" : "/input_component"
+          }
+        }
+      }
+    } ]
+  },
+  "parameters" : { }
+}
