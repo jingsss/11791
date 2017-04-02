@@ -1,0 +1,150 @@
+{
+  "discriminator" : "http://vocab.lappsgrid.org/ns/media/jsonld#lif",
+  "payload" : {
+    "@context" : "http://vocab.lappsgrid.org/context-1.0.0.jsonld",
+    "metadata" : { },
+    "text" : { },
+    "views" : [ {
+      "annotations" : [ {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?",
+          "is_num" : [ false, false, false, false, false, false, false, true, false ],
+          "TIME" : [ ],
+          "PERCENT" : [ ],
+          "pos" : [ "TO", "WP", "VBD", "DT", "NNP", "VBP", "IN", "CD", "NN" ],
+          "tokens" : [ "To", "whom", "did", "the", "Virgin Mary", "appear", "in", "1858", "Lourdes France" ],
+          "PERSON" : [ ],
+          "LOCATION" : [ "Lourdes France" ],
+          "squad_id" : "5733be284776f41900661182",
+          "question_type" : "HUM",
+          "DATE" : [ "1858" ],
+          "ORG" : [ "Virgin Mary" ],
+          "type" : "Question"
+        },
+        "id" : "Q"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "type" : "Answer",
+          "target" : [ "Saint Bernadette Soubirous" ],
+          "squad_id" : "5733be284776f41900661182"
+        },
+        "id" : "A"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "Architecturally, the school has a Catholic character",
+          "is_num" : [ false, false, false, false, false, false, false, false ],
+          "PERCENT" : [ ],
+          "pos" : [ "RB", ",", "DT", "NN", "VBZ", "DT", "NNP", "NN" ],
+          "rank" : 4,
+          "tokens" : [ "Architecturally", ",", "the", "school", "has", "a", "Catholic", "character" ],
+          "PERSON" : [ ],
+          "LOCATION" : [ ],
+          "squad_id" : "5733be284776f41900661182",
+          "TIME" : [ ],
+          "DATE" : [ ],
+          "ORG" : [ ],
+          "type" : "Sentence"
+        },
+        "id" : "S0"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "Atop the Main Building's gold dome is a golden statue of the Virgin Mary",
+          "is_num" : [ false, false, false, false, false, false, false, false, false, false, false, false, false, false ],
+          "PERCENT" : [ ],
+          "pos" : [ "IN", "DT", "NNP", "NNP", "POS", "NN", "NN", "VBZ", "DT", "JJ", "NN", "IN", "DT", "NNP" ],
+          "rank" : 3,
+          "tokens" : [ "Atop", "the", "Main", "Building", "'s", "gold", "dome", "is", "a", "golden", "statue", "of", "the", "Virgin Mary" ],
+          "PERSON" : [ ],
+          "LOCATION" : [ ],
+          "squad_id" : "5733be284776f41900661182",
+          "TIME" : [ ],
+          "DATE" : [ ],
+          "ORG" : [ "Virgin Mary" ],
+          "type" : "Sentence"
+        },
+        "id" : "S1"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend \"Venite Ad Me Omnes\"",
+          "is_num" : [ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false ],
+          "PERCENT" : [ ],
+          "pos" : [ "RB", "IN", "NN", "IN", "DT", "NNP", "NNP", "CC", "VBG", "PRP", ",", "VBZ", "DT", "NN", "NN", "IN", "NNP", "IN", "NNS", "VBN", "IN", "DT", "NN", "``", "NNP", "NNP", "NNP", "NNP", "''" ],
+          "rank" : 0,
+          "tokens" : [ "Immediately", "in", "front", "of", "the", "Main", "Building", "and", "facing", "it", ",", "is", "a", "copper", "statue", "of", "Christ", "with", "arms", "upraised", "with", "the", "legend", "``", "Venite", "Ad", "Me", "Omnes", "''" ],
+          "PERSON" : [ ],
+          "LOCATION" : [ ],
+          "squad_id" : "5733be284776f41900661182",
+          "TIME" : [ ],
+          "DATE" : [ ],
+          "ORG" : [ ],
+          "type" : "Sentence"
+        },
+        "id" : "S2"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "Next to the Main Building is the Basilica of the Sacred Heart",
+          "is_num" : [ false, false, false, false, false, false, false, false, false, false, false ],
+          "PERCENT" : [ ],
+          "pos" : [ "JJ", "TO", "DT", "NNP", "NNP", "VBZ", "DT", "NNP", "DT", "NNP", "NNP" ],
+          "rank" : 2,
+          "tokens" : [ "Next", "to", "the", "Main", "Building", "is", "the", "Basilica", "the", "Sacred", "Heart" ],
+          "PERSON" : [ ],
+          "LOCATION" : [ "Basilica" ],
+          "squad_id" : "5733be284776f41900661182",
+          "TIME" : [ ],
+          "DATE" : [ ],
+          "ORG" : [ ],
+          "type" : "Sentence"
+        },
+        "id" : "S3"
+      }, {
+        "@type" : "http://vocab.lappsgrid.org/Sentence",
+        "start" : -1,
+        "end" : -1,
+        "features" : {
+          "target" : "It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858",
+          "is_num" : [ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true ],
+          "PERCENT" : [ ],
+          "pos" : [ "PRP", "VBZ", "DT", "NN", "IN", "DT", "NN", "IN", "NNP", "NNP", "DT", "NNP", "VBD", "TO", "NNP", "NNP", "CD" ],
+          "rank" : 1,
+          "tokens" : [ "It", "is", "a", "replica", "of", "the", "grotto", "at", "Lourdes", "France", "the", "Virgin Mary", "appeared", "to", "Saint", "Bernadette Soubirous", "1858" ],
+          "PERSON" : [ "Bernadette Soubirous" ],
+          "LOCATION" : [ "Lourdes", "France" ],
+          "squad_id" : "5733be284776f41900661182",
+          "TIME" : [ ],
+          "DATE" : [ "1858" ],
+          "ORG" : [ "Virgin Mary" ],
+          "type" : "Sentence"
+        },
+        "id" : "S5"
+      } ],
+      "metadata" : {
+        "contains" : {
+          "http://vocab.lappsgrid.org/Sentence" : {
+            "type" : "token annotator component",
+            "producer" : "/token_annotator"
+          }
+        }
+      }
+    } ]
+  },
+  "parameters" : { }
+}

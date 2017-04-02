@@ -7,8 +7,8 @@ import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = 'stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = 'stanford/stanford-ner.jar'
+classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = '../stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 # 
 
@@ -187,10 +187,40 @@ def create_annotations(sentence):
 
     # print final_ans['tokens']
     final_ans['pos'] = pos_tags(new_tok)
-    final_ans['is_num'] = hasNumbers(new_tok)
+    nos = hasNumbers(new_tok)
+    final_ans['is_num'] = nos
+    ctr = 0
+    # gets all the numbers in the sentence 
+    all_num = []
+    for x in nos:
+        if x:
+            all_num.append(new_tok[ctr])
+            # print 'yay', ctr
+            # print  new_tok[ctr]
+            # print l
+        ctr += 1
+    # print all_num
+    # gets all entities from percent, time, date
+    all_num_sub = l_date+ l_time + l_percent
+    # print all_num_sub
+
+    l_number= list(set(all_num) - set(all_num_sub))
+    # print l_number 
+    final_ans['NUMBER'] = l_number
+
+
+
+
+
 
     return final_ans
-#
-#S ="To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France"
+
+
+#S ="Jack Brown studies at 4 Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University. He is a student"
 #print create_annotations(S)
+
+#
+S ="The Mitsubishi Electric Company Managing Director eat ramen"
+print create_annotations(S)
+
 
