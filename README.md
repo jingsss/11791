@@ -25,6 +25,9 @@ Question type and testing result:
 
      avg / total       0.90      0.88      0.88       500
 
+Confustion Matrix:
+
+
     [[  1   0   0   0   0   0   0   0   0   0]
      [  0  46   1   0   0   0   0   0   0   0]
      [  0   0 137   1   0   0   0   0   0   0]
