@@ -1,24 +1,24 @@
-# 11-791 Annotations using the  NLTK Library 
-import nltk 
+# 11-791 Annotations using the  NLTK Library
+import nltk
 from nltk import word_tokenize
 from nltk.tag.stanford import StanfordNERTagger
- 
+
 import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = '../stanford/stanford-ner.jar'
+classifier = './stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = './stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
-# 
+#
 
 # Tokenizes and returns pos tags for each token
-# function call 
+# function call
 # pos_tags("The house is painted blue")
 
-# output 
+# output
 # List if tuples
-# [('The', 'DT'), ('house', 'NN'), ('is', 'VBZ'), ('painted', 'VBN'), ('blue', 'JJ')] 
+# [('The', 'DT'), ('house', 'NN'), ('is', 'VBZ'), ('painted', 'VBN'), ('blue', 'JJ')]
 
 
 def tokenize(sent):
@@ -54,8 +54,8 @@ def norms(k):
         x[1].encode('ascii','ignore')
     return k
 
-# using Stnaford NER Tagger 7 class 
-# check for organizations 
+# using Stnaford NER Tagger 7 class
+# check for organizations
 # def get_entity_old(k2, ent):
 #     l = []
 #     for x in k2:
@@ -82,7 +82,7 @@ def norms(k):
 #             #l.append(x[0].encode('ascii','ignore'))
 #     if s != "":
 #         l.append(s)
-    
+
 #     #print l
 #     return l
 def get_entity_mod(k2, ent):
@@ -105,7 +105,7 @@ def get_entity_mod(k2, ent):
                     s2 = s
 
                 l.append(s2)
-                
+
                 tok_mod.append((s,ent))
                 s = ""
             #l.append(x[0].encode('ascii','ignore'))
@@ -148,13 +148,13 @@ def hasNumbers(k):
     l = []
     for inputString in k:
         t = any(char.isdigit() for char in inputString)
-        #print 
+        #print
         l.append(t)
 
     return l
 
 
-# main function 
+# main function
 #tokenize, POS tags, is num , NER Tags
 def create_annotations(sentence):
 
@@ -162,7 +162,7 @@ def create_annotations(sentence):
     tokens = tokenize(sentence)
     tokens = [w.replace('pm', 'p.m.') for w in tokens]
     tokens = [w.replace('am', 'a.m.') for w in tokens]
-    
+
     k2 = named_ent2(tokens)
     # final_ans['tokens'] = tokens
     # final_ans['pos'] = pos_tags(tokens)
@@ -182,7 +182,7 @@ def create_annotations(sentence):
             s2 = x[0]
 
         new_tok.append(s2)
-        
+
     final_ans['tokens'] = new_tok
 
     # print final_ans['tokens']
@@ -190,7 +190,7 @@ def create_annotations(sentence):
     nos = hasNumbers(new_tok)
     final_ans['is_num'] = nos
     ctr = 0
-    # gets all the numbers in the sentence 
+    # gets all the numbers in the sentence
     all_num = []
     for x in nos:
         if x:
@@ -205,7 +205,7 @@ def create_annotations(sentence):
     # print all_num_sub
 
     l_number= list(set(all_num) - set(all_num_sub))
-    # print l_number 
+    # print l_number
     final_ans['NUMBER'] = l_number
 
 
