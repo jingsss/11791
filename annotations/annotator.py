@@ -7,8 +7,8 @@ import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = 'stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = 'stanford/stanford-ner.jar'
+classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = '../stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 # 
 
@@ -216,11 +216,11 @@ def create_annotations(sentence):
     return final_ans
 
 
-S ="Jack Brown studies at 4 Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University. He is a student"
-print create_annotations(S)
+#S ="Jack Brown studies at 4 Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University. He is a student"
+#print create_annotations(S)
 
 #
-#S ="To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France"
-#print create_annotations(S)
+S ="The Mitsubishi Electric Company Managing Director eat ramen"
+print create_annotations(S)
 
 
