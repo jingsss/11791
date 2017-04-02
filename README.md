@@ -9,29 +9,6 @@ python ./question_classifier.py  ./data/train ./data/test/
 
 Question type and testing result:
 
-
-ABBREVIATION
-
-DATE
-
-DESC
-
-ENTITY
-
-EXPLAINATION
-
-LOCATION
-
-NUMBER
-
-ORGANIZATION
-
-PERCENT
-
-PERSON
-
-
-
     +++++++++++++++++++++++++++
                   precision    recall  f1-score   support
 
