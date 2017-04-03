@@ -101,7 +101,7 @@ def question_classifier_predict(docs_test1):
     filename = './classifier.joblib.pkl'
     grid_search = joblib.load(filename)
     y_predicted = grid_search.predict(docs_test1)
-    return y_predicted
+    return y_predicted[0]
 
 
 def question_classify(inputs):
