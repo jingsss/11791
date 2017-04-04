@@ -220,6 +220,7 @@ def answer_extractor():
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
 					a["features"]["best_candidate"] = best_candidate(sentence, question)
+					break
 #					ret = check_valid_candidate(a["features"],question_type)
 #					if len(ret) > 0:
 #						ret_tmp = [word_tokenize(i) for i in ret]
@@ -236,7 +237,29 @@ def answer_extractor():
 #                else:
 #                    a["features"]["best_candidate"] = list()
 	return jsonify(t)
-		
+	
+@app.route("/final_out",methods=['GET', 'POST'])
+def final_out():
+	t = request.json
+	for view in t["payload"]["views"]:
+		question = None
+		squad_id = None
+		candidate = None
+#        question_type = ""
+		for a in view["annotations"]:
+			if a["features"]["type"] == QUES:
+				question = a["features"]["target"]
+				squad_id = a['features']['squad_id']
+				break
+		for a in view["annotations"]:
+			if a["features"]["type"] == SENS:
+				if a["features"]["rank"] == 0:
+					sentence = a["features"]["target"]
+					candidate = best_candidate(sentence, question)	
+					break	
+	return jsonify(squad_id + ":" + candidate)
+	
+					
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
 	t = request.json

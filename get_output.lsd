@@ -6,7 +6,7 @@ import java.math.*;
 int start = 0;
 int total = 200;
 int range = 1000
-String filename = "out_200.txt"
+String filename = "output.txt"
 try {
 	FileWriter writer = new FileWriter(filename);
 	writer.write("row_num,id,P@1,idx_correct_sentence,AP,EM,F1\n");
