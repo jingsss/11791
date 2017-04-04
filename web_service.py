@@ -179,7 +179,33 @@ def sentence_ranker():
 	sentence_ranker.rank_by_jaccard_similarity()
 	data = sentence_ranker.get_data()
 	return jsonify(data)
-	
+
+def check_valid_candidate(features,question_type):
+    ret = True
+    if question_type == "ORGANIZATION":
+        if len(features["ORG"]) == 0:
+            ret = False
+    elif question_type == "DATE":
+        if len(features["DATE"]) == 0 and len(features["TIME"]) == 0:
+            ret = False
+    elif question_type == "LOCATION":
+        if len(features["LOC"]) == 0:
+            ret = False
+    elif question_type == "PERSON":
+        if len(features["PERSON"]) == 0:
+            ret = False
+    elif question_type == "PERCENT":
+        if len(features["PERCENT"]) == 0:
+            ret = False
+    elif question_type == "NUM":
+        ret = False
+        for item in features["is_num"]:
+            if item == True:
+                ret = True
+                break
+    else:
+        ret = False
+    return ret
 @app.route("/answer_extractor",methods=['GET', 'POST'])
 def answer_extractor():
 	t = request.json
@@ -187,15 +213,22 @@ def answer_extractor():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/answer_extractor"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "answers annotator component"
 		question = ""
+                question_type = ""
 		for a in view["annotations"]:
 			if a["features"]["type"] == QUES:
 				question = a["features"]["target"]
+                                question_type = str(a["features"]["question_type"])
 				break
 		for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
-				if a["features"]["rank"] == 0:
-					sentence = a["features"]["target"]
-					a["features"]["best_candidate"] = best_candidate(sentence, question)
+#				if a["features"]["rank"] == 0:
+#					sentence = a["features"]["target"]
+#					a["features"]["best_candidate"] = best_candidate(sentence, question)
+				sentence = a["features"]["target"]
+                if check_valid_candidate(a["features"],question_type) == True:
+				    a["features"]["best_candidate"] = best_candidate(sentence, question)
+                else:
+                    a["features"]["best_candidate"] = list()
 	return jsonify(t)
 	
 @app.route("/evaluation",methods=['GET', 'POST'])
