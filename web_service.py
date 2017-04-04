@@ -5,7 +5,7 @@ from collections import OrderedDict
 import sys
 import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize,word_tokenize
 from sliding_window import *
 path = sys.path[0]
 sys.path.append(path + "/sentence_ranker")
@@ -146,11 +146,11 @@ def token_annotator():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/token_annotator"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "token annotator component"
 		for a in view["annotations"]:
-			if a["features"]["type"] != ANS:
+			if a["features"]["type"] == SENS:
 				info = create_annotations(a["features"]["target"])
 				a["features"]["tokens"] = info["tokens"]
 				a["features"]["is_num"] = info["is_num"]
-				a["features"]["pos"] = info["pos"]
+#				a["features"]["pos"] = info["pos"]
 				a["features"]["PERCENT"] = info["PERCENT"]
 				a["features"]["TIME"] = info["TIME"]
 				a["features"]["DATE"] = info["DATE"]
@@ -181,30 +181,26 @@ def sentence_ranker():
 	return jsonify(data)
 
 def check_valid_candidate(features,question_type):
-    ret = True
+    ret = []
     if question_type == "ORGANIZATION":
-        if len(features["ORG"]) == 0:
-            ret = False
+        if len(features["ORG"]) > 0:
+            ret = features["ORG"]
     elif question_type == "DATE":
-        if len(features["DATE"]) == 0 and len(features["TIME"]) == 0:
-            ret = False
+        if len(features["DATE"]) > 0 or len(features["TIME"]) > 0:
+            ret = features["DATE"] + features["TIME"]
     elif question_type == "LOCATION":
-        if len(features["LOC"]) == 0:
-            ret = False
+        if len(features["LOCATION"]) > 0 or len(features["ORG"]) > 0:
+            ret = features["LOCATION"] + features["ORG"]
     elif question_type == "PERSON":
-        if len(features["PERSON"]) == 0:
-            ret = False
+        if len(features["PERSON"]) > 0:
+            ret = features["PERSON"]
     elif question_type == "PERCENT":
-        if len(features["PERCENT"]) == 0:
-            ret = False
+        if len(features["PERCENT"]) > 0:
+            ret = features["PERCENT"]
     elif question_type == "NUM":
-        ret = False
-        for item in features["is_num"]:
-            if item == True:
-                ret = True
-                break
+        ret = [features["toks"][i] for i in len(features["is_num"]) if features["is_num"][i] == True]
     else:
-        ret = False
+        ret = []
     return ret
 @app.route("/answer_extractor",methods=['GET', 'POST'])
 def answer_extractor():
@@ -213,24 +209,34 @@ def answer_extractor():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/answer_extractor"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "answers annotator component"
 		question = ""
-                question_type = ""
+#        question_type = ""
 		for a in view["annotations"]:
 			if a["features"]["type"] == QUES:
 				question = a["features"]["target"]
-                                question_type = str(a["features"]["question_type"])
+#                question_type = str(a["features"]["question_type"])
 				break
 		for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
-#				if a["features"]["rank"] == 0:
-#					sentence = a["features"]["target"]
-#					a["features"]["best_candidate"] = best_candidate(sentence, question)
-				sentence = a["features"]["target"]
-                if check_valid_candidate(a["features"],question_type) == True:
-				    a["features"]["best_candidate"] = best_candidate(sentence, question)
-                else:
-                    a["features"]["best_candidate"] = list()
+				if a["features"]["rank"] == 0:
+					sentence = a["features"]["target"]
+					a["features"]["best_candidate"] = best_candidate(sentence, question)
+#					ret = check_valid_candidate(a["features"],question_type)
+#					if len(ret) > 0:
+#						ret_tmp = [word_tokenize(i) for i in ret]
+#						q_tmp = word_tokenize(question)
+#						num = [[i,get_over_lap(ret_tmp[i], q_tmp)] for i in range(len(ret))]
+#						num = sorted(num, key = lambda x: -x[1])
+#						print num
+#					else:
+#						candidate = best_candidate(sentence, question)
+#						print candidate
+#					a["features"]["best_candidate"]
+#                if check_valid_candidate(a["features"],question_type) == True:
+#				    a["features"]["best_candidate"] = best_candidate(sentence, question)
+#                else:
+#                    a["features"]["best_candidate"] = list()
 	return jsonify(t)
-	
+		
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
 	t = request.json
