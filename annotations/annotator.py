@@ -2,13 +2,14 @@
 import nltk
 from nltk import word_tokenize
 from nltk.tag.stanford import StanfordNERTagger
+import re 
 
 import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = './stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = './stanford/stanford-ner.jar'
+classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = '../stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 #
 
@@ -35,12 +36,12 @@ def pos_tags(text):
     return poss
 
 
-def named_ent1(sent):
-    tagged = pos_tags(sent)
-    namedEnt = nltk.ne_chunk(tagged)
-    #print namedEnt
-    #namedEnt.draw()
-    return namedEnt
+# def named_ent1(sent):
+#     tagged = pos_tags(sent)
+#     namedEnt = nltk.ne_chunk(tagged)
+#     #print namedEnt
+#     #namedEnt.draw()
+#     return namedEnt
 
 def named_ent2(tagged):
     # tagged = tokenize(sent)
@@ -90,12 +91,15 @@ def get_entity_mod(k2, ent):
     tok_mod = []
     s = ""
     for x in k2:
+        # print x
         if x[1] == ent:
-            #print x[0]
+            # print "isent"
             s += x[0].encode('ascii','ignore') +" "
         else:
             if s == "":
                 tok_mod.append(x)
+                # print x
+
                 continue
             else:
                 #print s
@@ -107,6 +111,8 @@ def get_entity_mod(k2, ent):
                 l.append(s2)
 
                 tok_mod.append((s,ent))
+                tok_mod.append(x)
+                # print "elsE",s2
                 s = ""
             #l.append(x[0].encode('ascii','ignore'))
 
@@ -153,17 +159,23 @@ def hasNumbers(k):
 
     return l
 
-
 # main function
 #tokenize, POS tags, is num , NER Tags
 def create_annotations(sentence):
 
     final_ans = {}
-    tokens = tokenize(sentence)
-    tokens = [w.replace('pm', 'p.m.') for w in tokens]
-    tokens = [w.replace('am', 'a.m.') for w in tokens]
 
+    # print tokens
+    # tokens = [w.replace('pm', 'p.m.') for w in tokens]
+    # tokens = [w.replace('am', 'a.m.') for w in tokens]
+    replacements = {'am':'a.m.', 
+                'pm':'p.m.'}
+    s2 = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacements), replace, sentence) 
+    # print s2 
+    tokens = tokenize(s2)
     k2 = named_ent2(tokens)
+    # print k2 
+    # print pos_tags(tokens)
     # final_ans['tokens'] = tokens
     # final_ans['pos'] = pos_tags(tokens)
     l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
@@ -178,8 +190,12 @@ def create_annotations(sentence):
     for x in mod_tok:
         if x[0][-1] == " "  :
             s2 = x[0][:-1]
+            
         else:
             s2 = x[0]
+            # print s2
+
+
 
         new_tok.append(s2)
 
@@ -214,13 +230,18 @@ def create_annotations(sentence):
 
 
     return final_ans
+def replace(match):
+    replacements = {'am':'a.m.', 
+                'pm':'p.m.'}
+    return replacements[match.group(0)]
+
 
 
 #S ="Jack Brown studies at 4 Stony Brook University in New York since 1999 with 90% percentile at 5:00 pm in the evening in Oxford University. He is a student"
 #print create_annotations(S)
 
-#
-#S ="The Mitsubishi Electric Company Managing Director eat ramen"
-#print create_annotations(S)
+# This sentence has a grammatical error in the data 
+# S ="The Mitsubishi Electric Company Managing Director eat ramen"
+# print create_annotations(S)
 
 
