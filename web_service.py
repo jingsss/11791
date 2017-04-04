@@ -5,13 +5,13 @@ from collections import OrderedDict
 import sys
 import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
+from nltk.tokenize import sent_tokenize
 from sliding_window import *
 path = sys.path[0]
 sys.path.append(path + "/sentence_ranker")
 from SentenceRanker import *
 sys.path.append(path + "/annotations")
 from annotator import *
-
 class StanfordNLP:
 	def __init__(self):
 		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
@@ -28,11 +28,26 @@ QUES = "Question"
 SENS = "Sentence"
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
-def extract_pair(p):
-	idx = [i[1] for i in p]
-	group = [i[0] for i in p]
-	return [idx,group]
 
+def this_mean(list1):
+	if len(list1) == 0:
+		return 0.0
+	else:
+		return float(sum(list1))/len(list1)
+		
+def contain_any_answer(ans, sentence):
+	value = sum([int(a in sentence) for a in ans])
+	return int(value > 0)
+def get_F1(candidate, answer):
+	candidate = set(candidate.split(" "))
+	answer = set(answer.split(" "))
+	a_common = len(candidate.intersection(answer))
+	a_precision = float(a_common) / len(candidate)
+	a_recall = float(a_common) / len(answer)
+	F1_a = 0
+	if a_precision + a_recall > 0:
+		F1_a = 2 * a_precision * a_recall / (a_precision + a_recall)
+	return F1_a
 def init_container_as_dict():
 	data = {}
 	data['discriminator'] = "http://vocab.lappsgrid.org/ns/media/jsonld#lif"
@@ -101,7 +116,8 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		view["annotations"].append(ann)
 #		faster
 #		coref_list = coref(q_a["passage"][0])
-		sentences = q_a["passage"][0].strip().split(".")
+		
+		sentences = sent_tokenize(q_a["passage"][0])
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
 			ann = new_annotation('S' + str(i), uri_type)
@@ -177,8 +193,56 @@ def answer_extractor():
 				break
 		for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
-				sentence = a["features"]["target"]
-				a["features"]["best_candidate"] = best_candidate(sentence, question)
+				if a["features"]["rank"] == 0:
+					sentence = a["features"]["target"]
+					a["features"]["best_candidate"] = best_candidate(sentence, question)
 	return jsonify(t)
+	
+@app.route("/evaluation",methods=['GET', 'POST'])
+def evaluation():
+	t = request.json
+	for view in t["payload"]["views"]:
+		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/evaluation"
+		view["metadata"]["contains"][URI_SENTENCE]["type"] = "evaluation"
+		question = None
+		answer = None
+		candidate = None
+		squad_id = None
+		sentence = []
+		for a in view["annotations"]:
+			if a["features"]["type"] == QUES:
+				question = a["features"]["target"]
+				question = question.lower()
+				squad_id = a['features']['squad_id']
+			if a["features"]["type"] == ANS:
+				answer = a["features"]["target"]
+				answer = [a.lower() for a in answer]
+		for a in view["annotations"]:
+			if a["features"]["type"] == SENS:
+				s = a["features"]["target"]
+				s = s.lower()
+				sentence.append([s, int( a["features"]["rank"])])
+				if a["features"]["rank"] == 0:
+					candidate = a["features"]["best_candidate"].lower()
+					
+		sentence = sorted(sentence,key=lambda x: x[1])
+		rel_q = [contain_any_answer(answer, s[0]) for s in sentence]
+		p_k = [this_mean(rel_q[0:i+1]) for i in range(len(rel_q))]
+		pr = this_mean([p_k[i] for i in range(len(rel_q)) if rel_q[i] > 0])
+		first_k = -1
+		if pr > 0:
+			first_k = rel_q.index(1)
+		em = [int(candidate == a) for a in answer]
+		F1_a = [get_F1(candidate, a) for a in answer]
+#		stats = {}
+#		stats["id"] = squad_id
+#		stats["precision @ k"] = p_k[0]
+#		stats["pr"] = pr
+#		stats["em"] = max(em)
+#		stats["F1"] = max(F1_a)
+		values = [squad_id,p_k[0], first_k, pr, max(em), max(F1_a)]
+		values = [str(i) for i in values]
+		return jsonify(",".join(values))
+
 if __name__ == "__main__":
 	app.run()

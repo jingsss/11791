@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from nltk import word_tokenize
 import sys
 import json
 
@@ -32,9 +33,13 @@ class SentenceRanker():
         pass
 
     def jaccard_similartiy(self, str1, str2):
-        str1_set, str2_set = set(str1.split()), set(str2.split())
+        
+        str1_set, str2_set = set(word_tokenize(str1)), set(word_tokenize(str2))
         intersection_set = str1_set.intersection(str2_set)
-        return float(len(intersection_set)) / (len(str1_set) + len(str2_set) - len(intersection_set))
+#        print str1
+#        print intersection_set
+        return float(len(intersection_set)) 
+#        / (len(str1_set) + len(str2_set) - len(intersection_set))
 
     def get_data(self):
         return self.data

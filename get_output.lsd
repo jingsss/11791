@@ -1,0 +1,40 @@
+import java.net.*;
+import java.lang.String;
+import java.io.*;
+import json.org.*;
+import java.math.*;
+int start = 0;
+int total = 200;
+int range = 1000
+String filename = "out_200.txt"
+try {
+	FileWriter writer = new FileWriter(filename);
+	writer.write("row_num,id,P@1,idx_correct_sentence,AP,EM,F1\n");
+	for (int i = start; i < start + total; i ++){
+		int row_num = (int)(Math.random() * range);
+		String urlString = "http://127.0.0.1:8888/evaluation?row=" + Integer.toString(row_num);
+		URL url = new URL(urlString);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+		String json = ""
+		String line;
+		while ((line = reader.readLine()) != null){
+			json = json + line + "\n"
+		}
+		reader.close();
+		writer.write(Integer.toString(row_num) + "," + json.toString().replaceAll("\"", ""));
+	
+		System.out.println(i);
+	}
+	writer.close();
+}
+catch (IOException e) {
+	e.printStackTrace();
+}
+
+
+
+
+//reader.close();
+//Data data = new Data<>();
+//data = Serializer.parse(json, Data.class)
+//System.out.println(data.asPrettyJson());
