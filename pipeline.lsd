@@ -3,7 +3,8 @@ import java.lang.String;
 import java.io.*;
 import json.org.*;
 
-String urlString = "http://127.0.0.1:8888/pipeline?row=226";
+
+String urlString = "http://174.138.66.239:8888/pipeline?row=226";
 URL url = new URL(urlString);
 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 String json = ""
@@ -12,7 +13,8 @@ while ((line = reader.readLine()) != null){
 	json = json + line + "\n"
 }
 reader.close();
-Data data = new Data<>();
-data = Serializer.parse(json, Data.class)
-System.out.println(data.asPrettyJson());
+System.out.println(json)
+//Data data = new Data<>();
+//data = Serializer.parse(json, Data.class)
+//System.out.println(data.asPrettyJson());
 
