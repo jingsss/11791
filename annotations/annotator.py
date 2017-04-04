@@ -8,8 +8,8 @@ import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = '../stanford/stanford-ner.jar'
+classifier = './stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = './stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 #
 
