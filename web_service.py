@@ -223,8 +223,10 @@ def answer_extractor():
 						info = []
 					if len(info) > 0:
 						candidate = select_best(question, sentence, info)
+						a["features"]["select_method"] = "class"
 					else:
 						candidate = best_candidate(sentence, question)
+						a["features"]["select_method"] = "sliding"
 					a["features"]["best_candidate"] = candidate
 					break
 #					ret = check_valid_candidate(a["features"],question_type)

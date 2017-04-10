@@ -3,6 +3,7 @@ import nltk
 from nltk import word_tokenize
 from nltk.tag.stanford import StanfordNERTagger
 import re 
+from nltk.corpus import wordnet
 
 import unicodedata
 #nltk.download("words")
@@ -20,7 +21,15 @@ st = StanfordNERTagger(classifier,jar)
 # output
 # List if tuples
 # [('The', 'DT'), ('house', 'NN'), ('is', 'VBZ'), ('painted', 'VBN'), ('blue', 'JJ')]
-
+def get_type(word):
+    all_type = ["PERSON", "LOCATION", "ORGANIZATION", "DATE","LOCATION", "TIME", "PERCENT"]
+    synsets = wordnet.synsets(word)
+    if len(synsets) == 0:
+         return None
+    else:
+        p_tag = str(synsets[0].lexname()).split(".")[1].upper()
+        if p_tag in all_type:
+            return p_tag
 
 def tokenize(sent):
     text = nltk.word_tokenize(sent)

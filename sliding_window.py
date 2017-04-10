@@ -33,8 +33,8 @@ def best_candidate(Sentence, Question):
 	
 #Sentence2 = unicode("Beyonce has stated that she is personally inspired by US First Lady Michelle Obama, saying \"She proves you can do it all\" and she has described Oprah Winfrey as \"the definition of inspiration and a strong woman\".")
 #Question = "Beyonce has said that who embodies the definition of inspiration and a strong woman?"
-s = "Who suggested the hiatus for Beyonce"	
-q = "Beyonce announced a hiatus from her music career in January 2010, heeding her mother's advice, \"to live life, to be inspired by things again\""
+#s = "Who suggested the hiatus for Beyonce"	
+#q = "Beyonce announced a hiatus from her music career in January 2010, heeding her mother's advice, \"to live life, to be inspired by things again\""
 def select_best(Question, Sentence, tagger):	
 	c = list(phrasemachine.get_phrases(Question)['counts'])
 	Sentence2 = Sentence.lower()
@@ -43,8 +43,8 @@ def select_best(Question, Sentence, tagger):
 	dist = [sum([abs(i - j) for j in loc_s]) for i in loc]
 	return tagger[np.argmin(dist)]
 
-
-print create_annotations(q)['pos']
+#
+#print create_annotations(q)['pos']
 
 
 
