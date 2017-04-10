@@ -1,21 +1,32 @@
-import json
-from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
-from pprint import pprint
+#!/usr/bin/python
 
-class StanfordNLP:
-	def __init__(self):
-		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
-	def parse(self, text):
-		return json.loads(self.server.parse(text))
+from sliding_window import *
+from annotations.annotator import *
+import spacy
+from spacy.en import English
+from nltk.corpus import wordnet
+import phrasemachine
 
-nlp = StanfordNLP()
-#result = nlp.parse("CMU is a university. It is a big university")
-result = nlp.parse("Architecturally, the school has a Catholic character. Atop the Main Building's gold dome is a golden statue of the Virgin Mary. Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend \"Venite Ad Me Omnes\". Next to the Main Building is the Basilica of the Sacred Heart. Immediately behind the basilica is the Grotto, a Marian place of prayer and reflection. It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858. At the end of the main drive (and in a direct line that connects through 3 statues and the Gold Dome), is a simple, modern stone statue of Mary.")
-print result
-#for a in result['coref'][0]:
-#  print a
+def get_type(word):
+	all_type = ["PERSON", "LOCATION", "ORGANIZATION", "DATE","LOCATION", "TIME", "PERCENT"]
+	synsets = wordnet.synsets(word)
+	if len(synsets) == 0:
+		 return None
+	else:
+		p_tag = str(synsets[0].lexname()).split(".")[1].upper()
+		if p_tag in all_type:
+			return p_tag
+			
+#q = "Who suggested the hiatus for Beyonce"	
+#s = "Beyonce announced a hiatus from her music career in January 2010, heeding her mother's advice, \"to live life, to be inspired by things again\""
+#tag = create_annotations(s)
+#for i in range(len(tag['tokens'])):
+#	if tag['pos'][i] == 'NN':
+#		print tag['tokens'][i], get_type(tag['tokens'][i])
+##		
 
-#
-#from nltk.tree import Tree
-#tree = Tree.parse(result['sentences'][0]['parsetree'])
-#pprint(tree)
+print get_type("brother")
+
+
+	
+

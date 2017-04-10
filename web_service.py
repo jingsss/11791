@@ -7,11 +7,9 @@ import json
 from jsonrpc import ServerProxy, JsonRpc20, TransportTcpIp
 from nltk.tokenize import sent_tokenize,word_tokenize
 from sliding_window import *
-path = sys.path[0]
-sys.path.append(path + "/sentence_ranker")
-from SentenceRanker import *
-sys.path.append(path + "/annotations")
-from annotator import *
+from sentence_ranker.SentenceRanker import *
+from annotations.annotator import *
+
 class StanfordNLP:
 	def __init__(self):
 		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
@@ -168,8 +166,8 @@ def question_classifier():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/question_classifier"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "question classifier component"
 	res = question_classify(t)
-        #t = request.json
-        #print res
+		#t = request.json
+		#print res
 	return jsonify(res)
 
 @app.route("/sentence_ranker",methods=['GET', 'POST'])
@@ -181,27 +179,27 @@ def sentence_ranker():
 	return jsonify(data)
 
 def check_valid_candidate(features,question_type):
-    ret = []
-    if question_type == "ORGANIZATION":
-        if len(features["ORG"]) > 0:
-            ret = features["ORG"]
-    elif question_type == "DATE":
-        if len(features["DATE"]) > 0 or len(features["TIME"]) > 0:
-            ret = features["DATE"] + features["TIME"]
-    elif question_type == "LOCATION":
-        if len(features["LOCATION"]) > 0 or len(features["ORG"]) > 0:
-            ret = features["LOCATION"] + features["ORG"]
-    elif question_type == "PERSON":
-        if len(features["PERSON"]) > 0:
-            ret = features["PERSON"]
-    elif question_type == "PERCENT":
-        if len(features["PERCENT"]) > 0:
-            ret = features["PERCENT"]
-    elif question_type == "NUM":
-        ret = [features["toks"][i] for i in len(features["is_num"]) if features["is_num"][i] == True]
-    else:
-        ret = []
-    return ret
+	ret = []
+	if question_type == "ORGANIZATION":
+		if len(features["ORG"]) > 0:
+			ret = features["ORG"]
+	elif question_type == "DATE":
+		if len(features["DATE"]) > 0 or len(features["TIME"]) > 0:
+			ret = features["DATE"] + features["TIME"]
+	elif question_type == "LOCATION":
+		if len(features["LOCATION"]) > 0 or len(features["ORG"]) > 0:
+			ret = features["LOCATION"] + features["ORG"]
+	elif question_type == "PERSON":
+		if len(features["PERSON"]) > 0:
+			ret = features["PERSON"]
+	elif question_type == "PERCENT":
+		if len(features["PERCENT"]) > 0:
+			ret = features["PERCENT"]
+	elif question_type == "NUM":
+		ret = [features["toks"][i] for i in len(features["is_num"]) if features["is_num"][i] == True]
+	else:
+		ret = []
+	return ret
 @app.route("/answer_extractor",methods=['GET', 'POST'])
 def answer_extractor():
 	t = request.json
@@ -209,17 +207,27 @@ def answer_extractor():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/answer_extractor"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "answers annotator component"
 		question = ""
-#        question_type = ""
 		for a in view["annotations"]:
 			if a["features"]["type"] == QUES:
 				question = a["features"]["target"]
-#                question_type = str(a["features"]["question_type"])
+				question_type = str(a["features"]["question_type"])
 				break
 		for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
-					a["features"]["best_candidate"] = best_candidate(sentence, question)
+					info = create_annotations(sentence)
+					if question_type in info:
+						info = info[question_type]
+					else:
+						info = []
+					if len(info) > 0:
+						candidate = select_best(question, sentence, info)
+						a["features"]["select_method"] = "class"
+					else:
+						candidate = best_candidate(sentence, question)
+						a["features"]["select_method"] = "sliding"
+					a["features"]["best_candidate"] = candidate
 					break
 #					ret = check_valid_candidate(a["features"],question_type)
 #					if len(ret) > 0:
