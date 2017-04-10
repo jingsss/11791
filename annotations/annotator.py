@@ -8,8 +8,8 @@ import unicodedata
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = './stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = './stanford/stanford-ner.jar'
+classifier = 'stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = 'stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 #
 
@@ -180,7 +180,7 @@ def create_annotations(sentence):
     # final_ans['pos'] = pos_tags(tokens)
     l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
     # final_ans['is_num'] = hasNumbers(k2)
-    final_ans['ORG'] = l_org
+    final_ans['ORGANIZATION'] = l_org
     final_ans['PERSON'] = l_person
     final_ans['DATE'] = l_date
     final_ans['LOCATION'] = l_loc
@@ -204,7 +204,7 @@ def create_annotations(sentence):
     # print final_ans['tokens']
     final_ans['pos'] = pos_tags(new_tok)
     nos = hasNumbers(new_tok)
-    final_ans['is_num'] = nos
+    final_ans['NUM'] = nos
     ctr = 0
     # gets all the numbers in the sentence
     all_num = []

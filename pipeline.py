@@ -27,10 +27,10 @@ def pipeline():
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
 #	obj = get_from_component(obj, token_annotator)
-#	obj = get_from_component(obj, question_classifier_url)
+	obj = get_from_component(obj, question_classifier_url)
 	obj = get_from_component(obj, sentence_ranker_url)
-#	obj = get_from_component(obj, answer_extractor_url)
-	obj = get_from_component(obj, final_out_url)
+	obj = get_from_component(obj, answer_extractor_url)
+#	obj = get_from_component(obj, final_out_url)
         #print obj
 	return jsonify(obj)
 
