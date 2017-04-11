@@ -290,7 +290,7 @@ def replace(match):
 #print create_annotations(S)
 
 # This sentence has a grammatical error in the data 
-S ="The Mitsubishi Electric Company Managing Director eat ramen"
-print create_annotations(S)
+# S ="The Mitsubishi Electric Company Managing Director eat ramen"
+# print create_annotations(S)
 
 
