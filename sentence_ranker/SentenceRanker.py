@@ -20,8 +20,8 @@ class SentenceRanker():
         # with open(self.jsonobj) as data_file:
         #     self.data = json.load(data_file)
         self.data = jsonobj
-        self.stopwords = set(stopwords.words('english'))
-        self.stopwords.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}'])
+        self.stop_words = set(stopwords.words('english'))
+        self.stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}'])
 
     def rank_by_jaccard_similarity(self):
         all_views = self.data['payload']['views']
@@ -42,8 +42,7 @@ class SentenceRanker():
     def jaccard_similartiy(self, str1, str2):
         
         str1_set, str2_set = set(word_tokenize(str1.lower())), set(word_tokenize(str2.lower()))
-        str1_set, str2_set = str1_set - stopwords, str2_set - stopwords
-#         str1_set, str2_set = str1_set - stopwords, str2_set - stopwords # use stop words
+        str1_set, str2_set = str1_set - self.stop_words, str2_set - self.stop_words
         intersection_set = str1_set.intersection(str2_set)
 #        print str1
 #        print intersection_set
