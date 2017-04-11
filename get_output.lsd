@@ -4,15 +4,15 @@ import java.io.*;
 import json.org.*;
 import java.math.*;
 int start = 0;
-int total = 200;
-int range = 1000
-String filename = "output203.txt"
+int total = 100;
+int range = 10000
+String filename = "output103.txt"
 try {
 	FileWriter writer = new FileWriter(filename);
 	writer.write("row_num,id,P@1,idx_correct_sentence,AP,EM,F1\n");
 	for (int i = start; i < start + total; i ++){
-		int row_num = (int)(Math.random() * range);
-//		int row_num = i;
+//		int row_num = (int)(Math.random() * range);
+		int row_num = i;
 		String urlString = "http://127.0.0.1:8888/evaluation?row=" + Integer.toString(row_num);
 		URL url = new URL(urlString);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));

@@ -225,8 +225,6 @@ def answer_extractor():
 						info = []
 					if len(info) > 0:
 						candidate = select_best(question, sentence, info)
-						if len(candidate) < 2:
-							candidate = best_candidate_token(sentence, question, candidate)
 						a["features"]["select_method"] = "class"
 					else:
 						candidate = best_candidate(sentence, question)
