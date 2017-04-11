@@ -30,10 +30,10 @@ def pipeline():
 	obj = get_from_component(obj, question_classifier_url)
 	obj = get_from_component(obj, sentence_ranker_url)
 	obj = get_from_component(obj, answer_extractor_url)
-	obj = get_from_component(obj, final_out_url)
+#	obj = get_from_component(obj, final_out_url)
         #print obj
 	return jsonify(obj)
-
+tmp_dict = dict()
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
 	row = int(request.args.get('row'))
@@ -51,12 +51,23 @@ def evaluation():
 	r = requests.get(source_url)
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
-        print obj
+        #print obj
+        for view in  obj['payload']['views']:
+            for anno in  view['annotations']:
+                if anno['id'][0] == "Q":
+                    squad_id =anno['features']['squad_id'] + anno['id']
+                    target = anno['features']['target']
+                    tmp_dict[squad_id] = target
+
+        with open('tmp_dict.json', 'w') as fp:
+            json.dump(tmp_dict, fp, sort_keys=True, indent=4)
+        #print obj
 #	obj = get_from_component(obj, token_annotator)
-	obj = get_from_component(obj, question_classifier_url)
-	obj = get_from_component(obj, sentence_ranker_url)
-	obj = get_from_component(obj, answer_extractor_url)
-	obj = get_from_component(obj, evaluation_url)
+	#obj = get_from_component(obj, question_classifier_url)
+	#obj = get_from_component(obj, sentence_ranker_url)
+	#obj = get_from_component(obj, answer_extractor_url)
+	#obj = get_from_component(obj, evaluation_url)
+        #print tmp_dict
 	return jsonify(obj)
 if __name__ == "__main__":
 	app.run(port=8888)
