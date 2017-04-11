@@ -188,6 +188,46 @@ def create_annotations(sentence):
     # final_ans['tokens'] = tokens
     # final_ans['pos'] = pos_tags(tokens)
     l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
+
+    all_entity_tokens = l_org + l_date +l_person +l_loc + l_percent +l_time
+    k = []
+    # for w in mod_tok:
+    #     print "klist"
+    #     print w
+    #     print type(w)
+    #     print w[0]
+
+    #     exit() 
+    mod_tok_mod = [w[0] for w in mod_tok]
+    # print "all_entity_tokens",all_entity_tokens
+    ftok = list(set(mod_tok_mod) - set(all_entity_tokens))
+    # print "all_entity_tokens",all_entity_tokens
+    # print "mod tok",mod_tok_mod
+
+    # print "ftok", ftok
+    # print "ftok0", ftok[0]
+    # print get_type(ftok[0])
+    for w in ftok:
+        new_ent = get_type(w)
+        if new_ent == "PERSON":
+            # print w
+            l_person.append(w)
+        elif new_ent == "LOCATION":
+            l_loc.append(w)
+            # print w
+        elif new_ent == "ORGANIZATION":
+            l_org.append(w)
+            # print w
+        elif new_ent == "DATE":
+            l_date.append(w)
+            # print w
+        elif new_ent == "TIME":
+            l_time.append(w)
+            # print w
+        elif new_ent == "PERCENT":
+            l_percent.append(w)
+            # print w
+
     # final_ans['is_num'] = hasNumbers(k2)
     final_ans['ORGANIZATION'] = l_org
     final_ans['PERSON'] = l_person
@@ -250,7 +290,7 @@ def replace(match):
 #print create_annotations(S)
 
 # This sentence has a grammatical error in the data 
-# S ="The Mitsubishi Electric Company Managing Director eat ramen"
-# print create_annotations(S)
+S ="The Mitsubishi Electric Company Managing Director eat ramen"
+print create_annotations(S)
 
 
