@@ -46,10 +46,12 @@ def evaluation():
 	sentence_ranker_url = "http://127.0.0.1:5000/sentence_ranker"
 	answer_extractor_url = "http://127.0.0.1:5000/answer_extractor"
 	evaluation_url = "http://127.0.0.1:5000/evaluation"
+
 #	print source_url
 	r = requests.get(source_url)
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
+        print obj
 #	obj = get_from_component(obj, token_annotator)
 	obj = get_from_component(obj, question_classifier_url)
 	obj = get_from_component(obj, sentence_ranker_url)
