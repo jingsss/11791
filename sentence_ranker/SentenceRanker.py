@@ -39,7 +39,7 @@ class SentenceRanker():
     def jaccard_similartiy(self, str1, str2):
         
         str1_set, str2_set = set(word_tokenize(str1)), set(word_tokenize(str2))
-        # str1_set, str2_set = str1_set - stopwords, str2_set - stopwords # use stop words
+#         str1_set, str2_set = str1_set - stopwords, str2_set - stopwords # use stop words
         intersection_set = str1_set.intersection(str2_set)
 #        print str1
 #        print intersection_set

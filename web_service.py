@@ -219,6 +219,8 @@ def answer_extractor():
 					info = create_annotations(sentence)
 					if question_type in info:
 						info = info[question_type]
+						q = question.lower()
+						info = [i for i in info if i.lower() not in q]
 					else:
 						info = []
 					if len(info) > 0:
