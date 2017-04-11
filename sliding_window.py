@@ -72,7 +72,6 @@ def select_best(Question, Sentence, tagger):
 	dist = [sum([abs(i - j) for j in loc_s]) for i in loc]
 	return tagger[np.argmin(dist)]
 
-#print best_candidate_token(s, q, '400')
 #print create_annotations(q)['pos']
 
 

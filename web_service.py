@@ -225,27 +225,14 @@ def answer_extractor():
 						info = []
 					if len(info) > 0:
 						candidate = select_best(question, sentence, info)
+						if len(candidate) < 2:
+							candidate = best_candidate_token(sentence, question, candidate)
 						a["features"]["select_method"] = "class"
 					else:
 						candidate = best_candidate(sentence, question)
 						a["features"]["select_method"] = "sliding"
 					a["features"]["best_candidate"] = candidate
 					break
-#					ret = check_valid_candidate(a["features"],question_type)
-#					if len(ret) > 0:
-#						ret_tmp = [word_tokenize(i) for i in ret]
-#						q_tmp = word_tokenize(question)
-#						num = [[i,get_over_lap(ret_tmp[i], q_tmp)] for i in range(len(ret))]
-#						num = sorted(num, key = lambda x: -x[1])
-#						print num
-#					else:
-#						candidate = best_candidate(sentence, question)
-#						print candidate
-#					a["features"]["best_candidate"]
-#                if check_valid_candidate(a["features"],question_type) == True:
-#				    a["features"]["best_candidate"] = best_candidate(sentence, question)
-#                else:
-#                    a["features"]["best_candidate"] = list()
 	return jsonify(t)
 	
 @app.route("/final_out",methods=['GET', 'POST'])
