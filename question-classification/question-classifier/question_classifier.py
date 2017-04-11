@@ -39,7 +39,7 @@ def question_classifier_train(docs_train, y_train, docs_test):
 
     grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1)
     grid_search.fit(docs_train, y_train)
-    filename = './classifier.joblib.pkl'
+    filename = './classifier_new_try_it_if_you_got_free_time.joblib.pkl'
     _ = joblib.dump(grid_search, filename, compress=9)
     #grid_search = joblib.load(filename)
 
@@ -69,10 +69,11 @@ def tag_pre_process(PrimaryTag,SubTag):
     elif PrimaryTag == "LOC":
         res = "LOCATION"
     elif PrimaryTag == "ABBR":
-        if SubTag == "abb":
-            res = "ABBREVIATION"
-        elif SubTag == "exp":
-            res = "EXPLAINATION"
+        res = "OTHER"
+    #    if SubTag == "abb":
+    #        res = "ABBREVIATION"
+    #    elif SubTag == "exp":
+    #        res = "EXPLAINATION"
     else:
         res = PrimaryTag
     return res
@@ -132,6 +133,8 @@ if __name__ == "__main__":
         SubTag = splited[0].split(':',1)[1]
         Tag = splited[0]
         Text = splited[1]
+        if tag_pre_process(PrimaryTag,SubTag) == "OTHER":
+            continue
         docs_train.append(Text)
         y_train.append(tag_pre_process(PrimaryTag,SubTag))
         #print PrimaryTag
@@ -148,6 +151,8 @@ if __name__ == "__main__":
         Tag = splited[0]
         Text = splited[1]
 
+        if tag_pre_process(PrimaryTag,SubTag) == "OTHER":
+            continue
         docs_test.append(Text)
         y_test.append(tag_pre_process(PrimaryTag,SubTag))
         #print PrimaryTag
