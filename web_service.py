@@ -135,8 +135,11 @@ def tag_question(nlp,sentence):
     text_list = list()
     label_list = dict()
     for ent in doc.ents:
+        if ent.label_ in label_list:
+            label_list[ent.label_].append(ent.text)
+        else:
+            label_list[ent.label_] = ent.text
         text_list.append(ent.text)
-        label_list[ent.label_] = text_list
     return label_list
 
 
@@ -240,9 +243,9 @@ def answer_extractor():
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
                                         elif question_type in entity_info:
-						info = info[question_type]
-						q = question.lower()
-						info = [i for i in info if i.lower() not in q]
+						entity_info = entity_info[question_type]
+						q = entity_info.lower()
+						#info = [i for i in info if i.lower() not in q]
                                         else:
 						info = []
 					if len(info) > 0:
