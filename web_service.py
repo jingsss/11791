@@ -10,6 +10,9 @@ from sliding_window import *
 from sentence_ranker.SentenceRanker import *
 from annotations.annotator import *
 
+import spacy
+import en_core_web_sm
+
 class StanfordNLP:
 	def __init__(self):
 		self.server = ServerProxy(JsonRpc20(),TransportTcpIp(addr=("127.0.0.1", 9000)))
@@ -32,7 +35,7 @@ def this_mean(list1):
 		return 0.0
 	else:
 		return float(sum(list1))/len(list1)
-		
+
 def contain_any_answer(ans, sentence):
 	value = sum([int(a in sentence) for a in ans])
 	return int(value > 0)
@@ -114,7 +117,7 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 		view["annotations"].append(ann)
 #		faster
 #		coref_list = coref(q_a["passage"][0])
-		
+
 		sentences = sent_tokenize(q_a["passage"][0])
 		sentences = [i for i in sentences if len(i) > 0]
 		for i in range(len(sentences)):
@@ -126,6 +129,19 @@ def parse_element(jsonobj, component, uri_type = URI_SENTENCE):
 			view["annotations"].append(ann)
 		data['payload']['views'].append(view);
 	return data
+
+def tag_question(nlp,sentence):
+    doc = nlp(sentence)
+    text_list = list()
+    label_list = dict()
+    for ent in doc.ents:
+        text_list.append(ent.text)
+        label_list[ent.label_] = text_list
+    return label_list
+
+
+
+
 
 @app.route("/hello", methods=['GET', 'POST'])
 def hello():
@@ -203,7 +219,8 @@ def check_valid_candidate(features,question_type):
 @app.route("/answer_extractor",methods=['GET', 'POST'])
 def answer_extractor():
 	t = request.json
-	for view in t["payload"]["views"]:
+        nlp = en_core_web_sm.load()
+        for view in t["payload"]["views"]:
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/answer_extractor"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "answers annotator component"
 		question = ""
@@ -217,11 +234,16 @@ def answer_extractor():
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
 					info = create_annotations(sentence)
+                                        entity_info = tag_question(nlp,sentence)
 					if question_type in info:
 						info = info[question_type]
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
-					else:
+                                        elif question_type in entity_info:
+						info = info[question_type]
+						q = question.lower()
+						info = [i for i in info if i.lower() not in q]
+                                        else:
 						info = []
 					if len(info) > 0:
 						candidate = select_best(question, sentence, info)
@@ -232,7 +254,7 @@ def answer_extractor():
 					a["features"]["best_candidate"] = candidate
 					break
 	return jsonify(t)
-	
+
 @app.route("/final_out",methods=['GET', 'POST'])
 def final_out():
 	t = request.json
@@ -250,11 +272,11 @@ def final_out():
 			if a["features"]["type"] == SENS:
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
-					candidate = best_candidate(sentence, question)	
-					break	
+					candidate = best_candidate(sentence, question)
+					break
 	return jsonify(squad_id + ":" + candidate)
-	
-					
+
+
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
 	t = request.json
@@ -281,7 +303,7 @@ def evaluation():
 				sentence.append([s, int( a["features"]["rank"])])
 				if a["features"]["rank"] == 0:
 					candidate = a["features"]["best_candidate"].lower()
-					
+
 		sentence = sorted(sentence,key=lambda x: x[1])
 		rel_q = [contain_any_answer(answer, s[0]) for s in sentence]
 		p_k = [this_mean(rel_q[0:i+1]) for i in range(len(rel_q))]

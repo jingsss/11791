@@ -27,8 +27,8 @@ def question_classifier_train(docs_train, y_train, docs_test):
     # uncommenting more parameters will give better exploring power but will
     # increase processing time in a combinatorial way
     parameters = {
-        'vect__max_df': (0.5, 0.75, 1.0),
-        #'vect__max_features': (None, 5000, 10000, 50000),
+        #'vect__max_df': (0.5, 0.75, 1.0),
+        'vect__max_features': (None, 5000, 10000, 50000),
         'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),  # unigrams or bigrams
         'tfidf__use_idf': (True, False),
         'tfidf__norm': ('l1', 'l2'),
@@ -57,15 +57,30 @@ def tag_pre_process(PrimaryTag,SubTag):
             res = "DATE"
         elif SubTag == "perc":
             res = "PERCENT"
+        elif SubTag == "money":
+            res = "MONEY"
+        elif SubTag == "weight" or SubTag == "dist":
+            res = "QUANTITY"
+        elif SubTag == "ord":
+            res = "ORDINAL"
         else:
-            res = "NUMBER"
+            res = "CARDINAL"
     elif PrimaryTag == "HUM":
         if SubTag == "gr":
             res = "ORGANIZATION"
         else:
             res = "PERSON"
     elif PrimaryTag == "ENTY":
-        res = "ENTITY"
+        if SubTag == "lang":
+            res = "LANGUAGE"
+        elif SubTag == "dismed" or SubTag == "food" or SubTag == "product" or SubTag == "plant":
+            res = "PRODUCT"
+        elif SubTag == "event" or SubTag == "sport" or SubTag == "cremat":
+            res = "EVENT"
+        elif SubTag == "cremat":
+            res = "WORK_OF_ART"
+        else:
+            res = "ENTITY"
     elif PrimaryTag == "LOC":
         res = "LOCATION"
     elif PrimaryTag == "ABBR":
@@ -89,17 +104,17 @@ def question_classifier_predict(docs_test1):
     # uncommenting more parameters will give better exploring power but will
     # increase processing time in a combinatorial way
     parameters = {
-        'vect__max_df': (0.5, 0.75, 1.0),
+        #'vect__max_df': (0.5, 0.75, 1.0),
         'vect__max_features': (None, 5000, 10000, 50000),
         'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),  # unigrams or bigrams
         'tfidf__use_idf': (True, False),
         'tfidf__norm': ('l1', 'l2'),
         'clf__alpha': (0.00001, 0.000001),
         'clf__penalty': ('l2', 'elasticnet'),
-        'clf__n_iter': (10, 50, 80),
+        #'clf__n_iter': (10, 50, 80),
     }
 
-    filename = './classifier.joblib.pkl'
+    filename = './classifier_new_try_it_if_you_got_free_time.joblib.pkl'
     grid_search = joblib.load(filename)
     y_predicted = grid_search.predict(docs_test1)
     return y_predicted[0]
