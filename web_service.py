@@ -30,6 +30,7 @@ SENS = "Sentence"
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 
+
 def this_mean(list1):
 	if len(list1) == 0:
 		return 0.0
@@ -134,11 +135,20 @@ def tag_question(nlp,sentence):
     doc = nlp(sentence)
     text_list = list()
     label_list = dict()
+    pre = None
     for ent in doc.ents:
+
         if ent.label_ in label_list:
-            label_list[ent.label_] = label_list[ent.label_] +  ent.text
+            if pre ==  ent.label_:
+                label_list[ent.label_][-1] = label_list[ent.label_][-1] +  ent.text
+            else:
+                label_list[ent.label_].append(ent.text)
         else:
-            label_list[ent.label_] = ent.text
+            label_list[ent.label_] = list()
+            print ent.text
+            label_list[ent.label_].append(ent.text)
+
+        pre = ent.label_
         text_list.append(ent.text)
     return label_list
 
@@ -242,11 +252,11 @@ def answer_extractor():
 						info = info[question_type]
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
-                                        #elif question_type in entity_info:
-					#	entity_info = entity_info[question_type]
-					#	#info = entity_info.lower()
-					#	q = question.lower()
-					#	info = [i for i in info if i.lower() not in q]
+                                        elif question_type in entity_info:
+						entity_info = entity_info[question_type]
+						info = entity_info
+						q = question.lower()
+						info = [i for i in info if i.lower() not in q]
                                         else:
 						info = []
 					if len(info) > 0:
@@ -279,7 +289,6 @@ def final_out():
 					candidate = best_candidate(sentence, question)
 					break
 	return jsonify(squad_id + ":" + candidate)
-
 
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
@@ -315,8 +324,10 @@ def evaluation():
 		first_k = -1
 		if pr > 0:
 			first_k = rel_q.index(1)
+
 		em = [int(candidate == a) for a in answer]
 		F1_a = [get_F1(candidate, a) for a in answer]
+                calccc(max(em), max(F1_a))
 #		stats = {}
 #		stats["id"] = squad_id
 #		stats["precision @ k"] = p_k[0]

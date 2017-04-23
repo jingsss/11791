@@ -9,6 +9,7 @@ import hashlib
 
 
 parse_cache = dict()
+statt= dict()
 def get_md5(Sentence):
     tmp = Sentence.encode("utf-8")
     m = hashlib.md5()
@@ -30,14 +31,30 @@ def traverseTree(tree,list1,list2, question):
 			tmp = subtree.leaves()
 			traverseTree(subtree, list1, list2, question)
 
+global eval_counter
+global eval_f1
+global eval_em
+
+statt["eval_counter"] = 0.0
+statt["eval_em"] = 0.0
+statt["eval_f1"] = 0.0
+eval_em = 0
+eval_f1 = 0
+def calccc(em,F1_a):
+    statt["eval_counter"] =  float(statt["eval_counter"]) + 1
+    #print statt["eval_counter"]
+    statt["eval_em"] = float(statt["eval_em"]) + float(em)
+    statt["eval_f1"] = float(statt["eval_f1"]) + F1_a
+    print "current ave em:" + str(statt["eval_em"] / statt["eval_counter"])
+    print "current ave f1:" + str(statt["eval_f1"] / statt["eval_counter"])
 
 def best_candidate(Sentence, Question):
         #Sentence = 'Notre Dame\'s most recent when?'
 
         #Sentence = Sentence.replace('[',' ')
         #Sentence = Sentence.replace(']',' ')
-        print Sentence
-        print Question
+        #print Sentence
+        #print Question
         key = get_md5(Sentence)
         if key in parse_cache:
             print "hit"

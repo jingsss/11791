@@ -51,7 +51,7 @@ def evaluation():
 	r = requests.get(source_url)
 	obj = r.json()
 	obj = get_from_component(obj, input_component)
-        print obj
+        #print obj
 #	obj = get_from_component(obj, token_annotator)
 	obj = get_from_component(obj, question_classifier_url)
 	obj = get_from_component(obj, sentence_ranker_url)
