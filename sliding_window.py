@@ -5,13 +5,21 @@ import spacy
 import phrasemachine
 from annotations.annotator import *
 from nltk.corpus import stopwords
+import hashlib
 
+
+parse_cache = dict()
+def get_md5(Sentence):
+    tmp = Sentence.encode("utf-8")
+    m = hashlib.md5()
+    m.update(tmp)
+    return  m.digest()
 def get_over_lap(list1, list2):
 	list1 = [i.lower() for i in list1]
 	list2 = [i.lower() for i in list2]
 	num = len(set(list1).intersection(set(list2)))
 	return num
-	
+
 def traverseTree(tree,list1,list2, question):
 	tmp = tree.leaves()
 	num = get_over_lap(tmp, question)
@@ -21,13 +29,29 @@ def traverseTree(tree,list1,list2, question):
 		if type(subtree) == nltk.tree.Tree:
 			tmp = subtree.leaves()
 			traverseTree(subtree, list1, list2, question)
-			
+
+
 def best_candidate(Sentence, Question):
-	parser = Parser()
-	tree = parser.parse(Sentence)
-	list1 = []
+        #Sentence = 'Notre Dame\'s most recent when?'
+
+        #Sentence = Sentence.replace('[',' ')
+        #Sentence = Sentence.replace(']',' ')
+        print Sentence
+        print Question
+        key = get_md5(Sentence)
+        if key in parse_cache:
+            print "hit"
+            tree = parse_cache[key]
+        else:
+            try:
+	        parser = Parser()
+                tree = parser.parse(Sentence)
+                parse_cache[key] = tree
+            except:
+                return " "
+        list1 = []
 	list2 =[]
-	traverseTree(tree, list1, list2, Question.split())
+        traverseTree(tree, list1, list2, Question.split())
 	min_overlap = min(list2)
 	num = [[i,len(list1[i])] for i in range(len(list1)) if list2[i] == min_overlap]
 	s = sorted(num, key = lambda x: -x[1])
@@ -45,26 +69,38 @@ def traverseTree_token(tree,list1,list2, question, token):
 				traverseTree_token(subtree, list1, list2, question, token)
 	else:
 		return
-			
+
 def best_candidate_token(Sentence, Question, token):
-	parser = Parser()
-	tree = parser.parse(Sentence)
-	list1 = []
+	#parser = Parser()
+	#tree = parser.parse(Sentence)
+
+        key = get_md5(Sentence)
+        if key in parse_cache:
+            print "hit"
+            tree = parse_cache[key]
+        else:
+            try:
+	        parser = Parser()
+                tree = parser.parse(Sentence)
+                parse_cache[key] = tree
+            except:
+                return " "
+        list1 = []
 	list2 =[]
 	traverseTree_token(tree, list1, list2, Question.split(),token)
 	min_overlap = min(list2)
 	num = [[i,len(list1[i])] for i in range(len(list1)) if list2[i] == min_overlap]
 	s = sorted(num, key = lambda x: -x[1])
 	return " ".join(list1[s[0][0]])
-	
+
 #Sentence2 = unicode("Beyonce has stated that she is personally inspired by US First Lady Michelle Obama, saying \"She proves you can do it all\" and she has described Oprah Winfrey as \"the definition of inspiration and a strong woman\".")
 #Question = "Beyonce has said that who embodies the definition of inspiration and a strong woman?"
-#s = "Who suggested the hiatus for Beyonce"	
+#s = "Who suggested the hiatus for Beyonce"
 #q = "Beyonce announced a hiatus from her music career in January 2010, heeding her mother's advice, \"to live life, to be inspired by things again\""
 
 q = "How many editions of Heat exist?"
 s= "The six editions of Heat are the world's best-selling celebrity fragrance line, with sales of over $400 million."
-def select_best(Question, Sentence, tagger):	
+def select_best(Question, Sentence, tagger):
 	c = list(phrasemachine.get_phrases(Question)['counts'])
 	Sentence2 = Sentence.lower()
 	loc_s = [Sentence2.find(i.lower()) for i in c]
