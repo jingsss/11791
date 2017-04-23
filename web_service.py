@@ -242,11 +242,11 @@ def answer_extractor():
 						info = info[question_type]
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
-                                        elif question_type in entity_info:
-						entity_info = entity_info[question_type]
-						#info = entity_info.lower()
-						q = question.lower()
-						info = [i for i in info if i.lower() not in q]
+                                        #elif question_type in entity_info:
+					#	entity_info = entity_info[question_type]
+					#	#info = entity_info.lower()
+					#	q = question.lower()
+					#	info = [i for i in info if i.lower() not in q]
                                         else:
 						info = []
 					if len(info) > 0:

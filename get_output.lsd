@@ -3,7 +3,7 @@ import java.lang.String;
 import java.io.*;
 import json.org.*;
 import java.math.*;
-int start = 100;
+int start = 0;
 int total = 100;
 int range = 10000
 String filename = "output103.txt"
