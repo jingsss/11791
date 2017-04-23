@@ -136,25 +136,56 @@ def tag_question(nlp,sentence):
     text_list = list()
     label_list = dict()
     pre = None
+    #print doc
+    print doc.ents
     for ent in doc.ents:
 
         if ent.label_ in label_list:
-            if pre ==  ent.label_:
-                label_list[ent.label_][-1] = label_list[ent.label_][-1] +  ent.text
-            else:
+            #if pre ==  ent.label_:
+            #    label_list[ent.label_][-1] = str(label_list[ent.label_][-1]) +  ent.text
+            #else:
                 label_list[ent.label_].append(ent.text)
+                #print "append start"
+                #print ent.text
+                #print label_list[ent.label_]
+                #print "append end"
         else:
             label_list[ent.label_] = list()
-            print ent.text
+            #print ent.text
             label_list[ent.label_].append(ent.text)
 
         pre = ent.label_
         text_list.append(ent.text)
     return label_list
 
+def question_group(question_type,entity_info):
 
-
-
+    res = list()
+    group = dict()
+    group['DATE'] = 'NUM'
+    group['NUM'] = 'NUM'
+    group['CARDINAL'] = 'NUM'
+    group['MONEY'] = 'NUM'
+    group['TIME'] = 'NUM'
+    group['ORDINAL'] = 'NUM'
+    group['QUANTITY'] = 'NUM'
+    group['LOCATION'] = 'LOCATION'
+    group['GPE'] = 'LOCATION'
+    group['LOC'] = 'LOCATION'
+    group['NORP'] = 'LOCATION'
+    group['ORG'] = 'ORGANIZATION'
+    group['ORGANIZATION'] = 'ORGANIZATION'
+    if question_type in entity_info:
+        return entity_info[question_type]
+    else:
+        for type_key in entity_info:
+            try:
+                if group[type_key] == group[question_type]:
+                    res =entity_info[type_key]
+                    return res
+            except:
+                continue
+    return res
 
 @app.route("/hello", methods=['GET', 'POST'])
 def hello():
@@ -242,19 +273,26 @@ def answer_extractor():
 				question = a["features"]["target"]
 				question_type = str(a["features"]["question_type"])
 				break
-		for a in view["annotations"]:
+
+                print question
+                print  question_type
+                for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
 					info = create_annotations(sentence)
                                         entity_info = tag_question(nlp,sentence)
-					if question_type in info:
-						info = info[question_type]
-						q = question.lower()
-						info = [i for i in info if i.lower() not in q]
-                                        elif question_type in entity_info:
-						entity_info = entity_info[question_type]
+                                        print entity_info
+
+                                        if len(question_group(question_type,entity_info)) > 0:
+						entity_info = question_group(question_type,entity_info)
+                                                print entity_info
 						info = entity_info
+						a["features"]["select_method"] = "class"
+					        a["features"]["best_candidate"] =  entity_info[0]
+	                                        return jsonify(t)
+                                        elif question_type in info:
+						info = info[question_type]
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
                                         else:
@@ -324,7 +362,8 @@ def evaluation():
 		first_k = -1
 		if pr > 0:
 			first_k = rel_q.index(1)
-
+                print "answer: " + str(answer)
+                print "candidate: " + str(candidate.encode("utf-8"))
 		em = [int(candidate == a) for a in answer]
 		F1_a = [get_F1(candidate, a) for a in answer]
                 calccc(max(em), max(F1_a))

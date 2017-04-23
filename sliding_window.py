@@ -42,7 +42,6 @@ eval_em = 0
 eval_f1 = 0
 def calccc(em,F1_a):
     statt["eval_counter"] =  float(statt["eval_counter"]) + 1
-    #print statt["eval_counter"]
     statt["eval_em"] = float(statt["eval_em"]) + float(em)
     statt["eval_f1"] = float(statt["eval_f1"]) + F1_a
     print "current ave em:" + str(statt["eval_em"] / statt["eval_counter"])
@@ -53,7 +52,7 @@ def best_candidate(Sentence, Question):
 
         #Sentence = Sentence.replace('[',' ')
         #Sentence = Sentence.replace(']',' ')
-        #print Sentence
+        print "Sentence: " +  Sentence
         #print Question
         key = get_md5(Sentence)
         if key in parse_cache:
@@ -91,6 +90,7 @@ def best_candidate_token(Sentence, Question, token):
 	#parser = Parser()
 	#tree = parser.parse(Sentence)
 
+        print "Sentence: " +  Sentence
         key = get_md5(Sentence)
         if key in parse_cache:
             print "hit"
