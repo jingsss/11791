@@ -6,11 +6,14 @@ import re
 from nltk.corpus import wordnet
 
 import unicodedata
+import spacy
+nlp = spacy.load('en')
+
 #nltk.download("words")
 #nltk.download('punkt')
 #nltk.download('averaged_perceptron_tagger')
-classifier = 'stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
-jar = 'stanford/stanford-ner.jar'
+classifier = '../stanford/classifiers/english.muc.7class.distsim.crf.ser.gz'
+jar = '../stanford/stanford-ner.jar'
 st = StanfordNERTagger(classifier,jar)
 #
 
@@ -22,7 +25,7 @@ st = StanfordNERTagger(classifier,jar)
 # List if tuples
 # [('The', 'DT'), ('house', 'NN'), ('is', 'VBZ'), ('painted', 'VBN'), ('blue', 'JJ')]
 def get_type(word):
-    all_type = ["PERSON", "LOCATION", "ORGANIZATION", "DATE","LOCATION", "TIME", "PERCENT"]
+    all_type = ["PERSON", "LOCATION", "ORGANIZATION", "DATE", "TIME", "PERCENT"]
     synsets = wordnet.synsets(word)
     if len(synsets) == 0:
          return None
@@ -45,56 +48,100 @@ def pos_tags(text):
     return poss
 
 
-# def named_ent1(sent):
-#     tagged = pos_tags(sent)
-#     namedEnt = nltk.ne_chunk(tagged)
-#     #print namedEnt
-#     #namedEnt.draw()
-#     return namedEnt
-
 def named_ent2(tagged):
     # tagged = tokenize(sent)
     namedEnt = st.tag(tagged)
     #print namedEnt
     #namedEnt.draw()
+    print "NER"
+    print namedEnt
+
     return namedEnt
+
+
+def calc_tags(s):
+    doc = nlp(unicode(s))
+    # print "SPACY"
+    loc = [] # facility, gpe,loc
+    person = [] # person,
+    org = [] # norp, org
+    product = [] # prod , work of art , language
+    event = [] # event 
+    date = [] #date 
+    time = [] # time 
+    num = [] # ppercent, money, quantity, ordinal , cardinal
+    f_tok = []  
+    # print doc
+    doc2 = nlp.tokenizer(unicode(s))
+    # for word in doc:
+    #     print(word.text, word.lemma, word.lemma_, word.tag, word.tag_, word.pos, word.pos_)
+    # #print type(doc2)
+
+
+    allent = []
+    for ent in doc.ents:
+        # print ent.label_, ent.text
+        if ent.label_ == "GPE"  or \
+            ent.label_ == "LOC" or \
+            ent.label_ == "FACILITY" :
+            loc.append(ent.text)
+
+        elif ent.label_ == "PERSON":
+            person.append(ent.text)
+
+        elif ent.label_ == "NORP"  or \
+            ent.label_ == "ORG":
+            org.append(ent.text)
+
+        elif ent.label_ == "PRODUCT"  or \
+            ent.label_ == "WORK_OF_ART" or \
+            ent.label_ == "LANGUAGE" :
+            product.append(ent.text)
+
+        elif ent.label_ == "EVENT" :
+            event.append(ent.text)
+        elif ent.label_ == "DATE":
+            date.append(ent.text)
+
+        elif ent.label_ == "TIME":
+            time.append(ent.text)
+        elif ent.label_ == "PERCENT" or \
+            ent.label_ == "MONEY" or \
+            ent.label_ == "QUANTITY" or \
+            ent.label_ == "ORDINAL" or \
+            ent.label_ == "CARDINAL":
+            num.append(ent.text)
+    # allent = loc+person+org+ product + event+ date+ time+ num 
+
+    # alls = [] 
+
+    # for x in doc2:
+    #     print x 
+    #     if x not in allent:
+    #         sub = ""
+    #         alls.append(x)
+    #     else:
+    #         sub =+ x
+
+    # print alls
+
+
+
+
+
+        # if x not in list(doc.ents):
+        #     print x
+        #     f_tok.append(x)
+
+    # print f_tok
+    
+    return loc, person,org, product, event,date, time, num
 
 def norms(k):
     for x in k:
         x[1].encode('ascii','ignore')
     return k
 
-# using Stnaford NER Tagger 7 class
-# check for organizations
-# def get_entity_old(k2, ent):
-#     l = []
-#     for x in k2:
-#         if x[1] == ent:
-#             # print x[0]
-#             l.append(x[0].encode('ascii','ignore'))
-#     return l
-
-
-# def get_entity(k2, ent):
-#     l = []
-#     s = ""
-#     for x in k2:
-#         if x[1] == ent:
-#             #print x[0]
-#             s += x[0].encode('ascii','ignore') +" "
-#         else:
-#             if s == "":
-#                 continue
-#             else:
-#                 #print s
-#                 l.append(s)
-#                 s = ""
-#             #l.append(x[0].encode('ascii','ignore'))
-#     if s != "":
-#         l.append(s)
-
-#     #print l
-#     return l
 def get_entity_mod(k2, ent):
     l = []
     tok_mod = []
@@ -181,14 +228,34 @@ def create_annotations(sentence):
                 'pm':'p.m.'}
     s2 = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacements), replace, sentence) 
     # print s2 
-    tokens = tokenize(s2)
-    k2 = named_ent2(tokens)
-    # print k2 
-    # print pos_tags(tokens)
-    # final_ans['tokens'] = tokens
-    # final_ans['pos'] = pos_tags(tokens)
-    l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
+    loc, person,org, product, event,date, time, num = calc_tags(s2)
+    # print "org",org
+    # print "date",date
+    # print "person",person
+    # print "loc", loc
+    # print "time",time
+    # print "prod", product
+    # print "event", event
+    # print "num", num
 
+    new_tok = tokenize(s2)
+    # k2 = named_ent2(tokens)
+
+
+    # # print pos_tags(tokens)
+    # # final_ans['tokens'] = tokens
+    # # final_ans['pos'] = pos_tags(tokens)
+    # l_org, l_date, l_person, l_loc, l_percent, l_time,mod_tok  = all_entity(k2)
+    # print "org",l_org
+    # print "date",l_date
+    # print "person",l_person
+    # print "loc", l_loc
+    # print "%",l_percent
+    # print "time",l_time
+    # print mod_tok
+#    Code for including synset informaton from word net into the ans extractor #
+#
+#
 #    all_entity_tokens = l_org + l_date +l_person +l_loc + l_percent +l_time
 #    k = []
 #    # for w in mod_tok:
@@ -229,49 +296,51 @@ def create_annotations(sentence):
 #            # print w
 
     # final_ans['is_num'] = hasNumbers(k2)
-    final_ans['ORGANIZATION'] = l_org
-    final_ans['PERSON'] = l_person
-    final_ans['DATE'] = l_date
-    final_ans['LOCATION'] = l_loc
-    final_ans['TIME'] = l_time
-    final_ans['PERCENT'] = l_percent
-    new_tok = []
-    for x in mod_tok:
-        if x[0][-1] == " "  :
-            s2 = x[0][:-1]
+    final_ans['ORGANIZATION'] = org
+    final_ans['PERSON'] = person
+    final_ans['DATE'] = date
+    final_ans['LOCATION'] = loc
+    final_ans['TIME'] = time
+    final_ans['PRODUCT'] = product
+    final_ans['EVENT'] = event
+    #final_ans[''] = l_percent
+    # new_tok = []
+    # for x in mod_tok:
+    #     if x[0][-1] == " "  :
+    #         s2 = x[0][:-1]
             
-        else:
-            s2 = x[0]
-            # print s2
+    #     else:
+    #         s2 = x[0]
+    #         # print s2
 
 
 
-        new_tok.append(s2)
+    #     new_tok.append(s2)
 
     final_ans['tokens'] = new_tok
 
     # print final_ans['tokens']
     final_ans['pos'] = pos_tags(new_tok)
-    nos = hasNumbers(new_tok)
-    final_ans['NUM'] = nos
-    ctr = 0
-    # gets all the numbers in the sentence
-    all_num = []
-    for x in nos:
-        if x:
-            all_num.append(new_tok[ctr])
-            # print 'yay', ctr
-            # print  new_tok[ctr]
-            # print l
-        ctr += 1
+    # nos = hasNumbers(new_tok)
+    # final_ans['NUM'] = nos
+    # ctr = 0
+    # # gets all the numbers in the sentence
+    # all_num = []
+    # for x in nos:
+    #     if x:
+    #         all_num.append(new_tok[ctr])
+    #         # print 'yay', ctr
+    #         # print  new_tok[ctr]
+    #         # print l
+    #     ctr += 1
     # print all_num
     # gets all entities from percent, time, date
-    all_num_sub = l_date+ l_time + l_percent
-    # print all_num_sub
+    # all_num_sub = l_date+ l_time + l_percent
+    # # print all_num_sub
 
-    l_number= list(set(all_num) - set(all_num_sub))
+    # l_number= list(set(all_num) - set(all_num_sub))
     # print l_number
-    final_ans['NUMBER'] = l_number
+    final_ans['NUMBER'] = num
 
 
 
@@ -291,6 +360,7 @@ def replace(match):
 
 # This sentence has a grammatical error in the data 
 # S ="The Mitsubishi Electric Company Managing Director eat ramen"
-# print create_annotations(S)
+#S= "It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858."
+#print create_annotations(S)
 
 
