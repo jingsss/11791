@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask,jsonify,request
 import urllib, json
 import requests
@@ -9,6 +10,8 @@ from nltk.tokenize import sent_tokenize,word_tokenize
 from sliding_window import *
 from sentence_ranker.SentenceRanker import *
 from annotations.annotator import *
+from question_classification.question_classifier.question_classifier import question_classify
+
 
 import spacy
 import en_core_web_sm
@@ -19,8 +22,8 @@ class StanfordNLP:
 	def parse(self, text):
 		return json.loads(self.server.parse(text))
 
-sys.path.insert(0, './question-classification/question-classifier')
-from question_classifier import question_classify
+#sys.path.insert(0, './question-classification/question-classifier')
+#from question_classifier import question_classify
 
 URI_SENTENCE = "http://vocab.lappsgrid.org/Sentence"
 SERVER = "http://127.0.0.1:5000/"
@@ -137,7 +140,7 @@ def tag_question(nlp,sentence):
     label_list = dict()
     pre = None
     #print doc
-    print doc.ents
+#    print doc.ents
     for ent in doc.ents:
 
         if ent.label_ in label_list:
@@ -226,8 +229,6 @@ def question_classifier():
 		view["metadata"]["contains"][URI_SENTENCE]["producer"] = "/question_classifier"
 		view["metadata"]["contains"][URI_SENTENCE]["type"] = "question classifier component"
 	res = question_classify(t)
-		#t = request.json
-		#print res
 	return jsonify(res)
 
 @app.route("/sentence_ranker",methods=['GET', 'POST'])
@@ -260,6 +261,7 @@ def check_valid_candidate(features,question_type):
 	else:
 		ret = []
 	return ret
+	
 @app.route("/answer_extractor",methods=['GET', 'POST'])
 def answer_extractor():
 	t = request.json
@@ -273,32 +275,40 @@ def answer_extractor():
 				question = a["features"]["target"]
 				question_type = str(a["features"]["question_type"])
 				break
-
-                print question
-                print  question_type
+#
+#                print question
+#                print  question_type
                 for a in view["annotations"]:
 			if a["features"]["type"] == SENS:
 				if a["features"]["rank"] == 0:
 					sentence = a["features"]["target"]
 					info = create_annotations(sentence)
-                                        entity_info = tag_question(nlp,sentence)
-                                        print entity_info
-
-                                        if len(question_group(question_type,entity_info)) > 0:
-						entity_info = question_group(question_type,entity_info)
-                                                print entity_info
-						info = entity_info
-						a["features"]["select_method"] = "class"
-					        a["features"]["best_candidate"] =  entity_info[0]
-	                                        return jsonify(t)
-                                        elif question_type in info:
+#					print info
+#					entity_info = tag_question(nlp,sentence)
+					if question_type in info:
 						info = info[question_type]
 						q = question.lower()
 						info = [i for i in info if i.lower() not in q]
-                                        else:
+					else:
 						info = []
+#					print entity_info
+#					if len(question_group(question_type,entity_info)) > 0:
+#						entity_info = question_group(question_type,entity_info)
+#						print entity_info
+#						info = entity_info
+#						a["features"]["select_method"] = "class"
+#						a["features"]["best_candidate"] =  entity_info[0]
+#						return jsonify(t)
+#					elif question_type in info:
+#						info = info[question_type]
+#						q = question.lower()
+#						info = [i for i in info if i.lower() not in q]
+#					else:
+#						info = []
+					a["features"]["potential candidate"] = info
 					if len(info) > 0:
-						candidate = select_best(question, sentence, info)
+#						print "here"
+						candidate = select_best_2(question, sentence, info)
 						a["features"]["select_method"] = "class"
 					else:
 						candidate = best_candidate(sentence, question)
@@ -339,11 +349,15 @@ def evaluation():
 		candidate = None
 		squad_id = None
 		sentence = []
+		question_t = None
+		a_m = None
+		cs = None
 		for a in view["annotations"]:
 			if a["features"]["type"] == QUES:
 				question = a["features"]["target"]
 				question = question.lower()
 				squad_id = a['features']['squad_id']
+				question_t = str(a["features"]["question_type"])
 			if a["features"]["type"] == ANS:
 				answer = a["features"]["target"]
 				answer = [a.lower() for a in answer]
@@ -354,6 +368,9 @@ def evaluation():
 				sentence.append([s, int( a["features"]["rank"])])
 				if a["features"]["rank"] == 0:
 					candidate = a["features"]["best_candidate"].lower()
+					a_m = a["features"]["select_method"]
+					cs = a["features"]["potential candidate"]
+
 
 		sentence = sorted(sentence,key=lambda x: x[1])
 		rel_q = [contain_any_answer(answer, s[0]) for s in sentence]
@@ -362,8 +379,8 @@ def evaluation():
 		first_k = -1
 		if pr > 0:
 			first_k = rel_q.index(1)
-                print "answer: " + str(answer)
-                print "candidate: " + str(candidate.encode("utf-8"))
+#                print "answer: " + str(answer)
+#                print "candidate: " + str(candidate.encode("utf-8"))
 		em = [int(candidate == a) for a in answer]
 		F1_a = [get_F1(candidate, a) for a in answer]
                 calccc(max(em), max(F1_a))
@@ -373,9 +390,10 @@ def evaluation():
 #		stats["pr"] = pr
 #		stats["em"] = max(em)
 #		stats["F1"] = max(F1_a)
-		values = [squad_id,p_k[0], first_k, pr, max(em), max(F1_a)]
-		values = [str(i) for i in values]
-		return jsonify(",".join(values))
+#		values = [squad_id, question, question_t, answer[0], candidate, a_m, str(p_k[0]), str(first_k), str(pr), str(max(em)), str(max(F1_a))]
+		values = [squad_id, str(p_k[0]), str(first_k), str(pr), str(max(em)), str(max(F1_a)) ]
+#		values = [str(i) for i in values]
+		return jsonify(','.join(values))
 
 if __name__ == "__main__":
 	app.run()
