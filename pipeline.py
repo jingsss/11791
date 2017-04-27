@@ -59,4 +59,4 @@ def evaluation():
 	obj = get_from_component(obj, evaluation_url)
 	return jsonify(obj)
 if __name__ == "__main__":
-	app.run(port=8888)
+	app.run(host='0.0.0.0',port=8888)	

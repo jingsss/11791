@@ -10,7 +10,9 @@ from nltk.tokenize import sent_tokenize,word_tokenize
 from sliding_window import *
 from sentence_ranker.SentenceRanker import *
 from annotations.annotator import *
-from question_classification.question_classifier.question_classifier import question_classify
+#from question_classification.question_classifier.question_classifier import question_classify
+sys.path.insert(0, './question-classification/question-classifier')
+from question_classifier import question_classify
 
 
 import spacy
@@ -396,4 +398,5 @@ def evaluation():
 		return jsonify(','.join(values))
 
 if __name__ == "__main__":
-	app.run()
+	app.run(host='0.0.0.0')	
+	#app.run()
