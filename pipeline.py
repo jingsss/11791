@@ -9,13 +9,10 @@ def get_from_component(obj, url):
 	r = requests.post(url, data=json.dumps(obj), headers=headers)
 	obj = r.json()
 	return obj
-
-@app.route("/pipeline",methods=['GET', 'POST'])
-def pipeline():
+@app.route("/test_pipeline",methods=['GET', 'POST'])
+def test_pipeline():
 	row = int(request.args.get('row'))
-	f = "&q=fold:1"
-#	f = ""x
-	source_url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json%s"%(1, row,f)
+	source_url = "http://138.197.73.251:8983/solr/squad/select?indent=on&q=*:*&rows=%d&start=0&wt=json"%(row)
 	input_component = "http://127.0.0.1:5000/input_component"
 	token_annotator = "http://127.0.0.1:5000/token_annotator"
 	question_classifier_url = "http://127.0.0.1:5000/question_classifier"
@@ -31,6 +28,29 @@ def pipeline():
 	obj = get_from_component(obj, sentence_ranker_url)
 	obj = get_from_component(obj, answer_extractor_url)
 	obj = get_from_component(obj, final_out_url)
+        #print obj
+	return jsonify(obj)
+
+@app.route("/pipeline",methods=['GET', 'POST'])
+def pipeline():
+	row = int(request.args.get('row'))
+	f = "&q=fold:1"
+	source_url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json%s"%(row,0,f)
+	input_component = "http://127.0.0.1:5000/input_component"
+	token_annotator = "http://127.0.0.1:5000/token_annotator"
+	question_classifier_url = "http://127.0.0.1:5000/question_classifier"
+	sentence_ranker_url = "http://127.0.0.1:5000/sentence_ranker"
+	answer_extractor_url = "http://127.0.0.1:5000/answer_extractor"
+	final_out_url = "http://127.0.0.1:5000/final_out"
+#	print source_url
+	r = requests.get(source_url)
+	obj = r.json()
+	obj = get_from_component(obj, input_component)
+#	obj = get_from_component(obj, token_annotator)
+	obj = get_from_component(obj, question_classifier_url)
+	obj = get_from_component(obj, sentence_ranker_url)
+	obj = get_from_component(obj, answer_extractor_url)
+#	obj = get_from_component(obj, final_out_url)
         #print obj
 	return jsonify(obj)
 
