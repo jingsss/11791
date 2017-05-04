@@ -12,7 +12,7 @@ def get_from_component(obj, url):
 @app.route("/test_pipeline",methods=['GET', 'POST'])
 def test_pipeline():
 	row = int(request.args.get('row'))
-	source_url = "http://138.197.73.251:8983/solr/squad/select?indent=on&q=*:*&rows=%d&start=0&wt=json"%(row)
+	source_url = "http://138.197.73.251:8983/solr/squad/select?indent=on&q=*:*&rows=1&start=%d&wt=json"%(row)
 	input_component = "http://127.0.0.1:5000/input_component"
 	token_annotator = "http://127.0.0.1:5000/token_annotator"
 	question_classifier_url = "http://127.0.0.1:5000/question_classifier"
@@ -35,7 +35,7 @@ def test_pipeline():
 def pipeline():
 	row = int(request.args.get('row'))
 	f = "&q=fold:1"
-	source_url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json%s"%(row,0,f)
+	source_url = "http://138.197.73.251:8983/solr/train/select?indent=on&q=*:*&rows=%d&start=%d&wt=json%s"%(1,row,f)
 	input_component = "http://127.0.0.1:5000/input_component"
 	token_annotator = "http://127.0.0.1:5000/token_annotator"
 	question_classifier_url = "http://127.0.0.1:5000/question_classifier"
