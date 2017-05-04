@@ -338,7 +338,9 @@ def final_out():
 					sentence = a["features"]["target"]
 					candidate = best_candidate(sentence, question)
 					break
-	return jsonify(squad_id + ":" + candidate)
+	return_ans = {}
+	return_ans[squad_id] = candidate
+	return jsonify(return_ans)
 
 @app.route("/evaluation",methods=['GET', 'POST'])
 def evaluation():
